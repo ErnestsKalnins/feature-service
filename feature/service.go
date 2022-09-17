@@ -33,6 +33,10 @@ func (svc Service) saveFeature(ctx context.Context, f feature) error {
 	}
 
 	f.ID = id
+	if f.ExpiresOn != nil {
+		*f.ExpiresOn = f.ExpiresOn.UTC()
+	}
+
 	if err := svc.store.saveFeature(ctx, f); err != nil {
 		return fmt.Errorf("save feature: %w", err)
 	}

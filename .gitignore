@@ -1,2 +1,4 @@
 .idea
 feature.sqlite
+feature-test.sqlite
+feature-httpd

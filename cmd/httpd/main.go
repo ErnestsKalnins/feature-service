@@ -79,7 +79,7 @@ func main() {
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, syscall.SIGTERM, syscall.SIGKILL)
+		signal.Notify(sigint, syscall.SIGTERM)
 		<-sigint
 
 		if err := server.Shutdown(context.Background()); err != nil {
