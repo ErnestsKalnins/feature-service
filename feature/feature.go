@@ -16,6 +16,8 @@ type feature struct {
 	ExpiresOn     *time.Time
 	Description   *string
 	Inverted      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (f feature) validate() error {

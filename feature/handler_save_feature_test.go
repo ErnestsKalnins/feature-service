@@ -35,12 +35,14 @@ func TestSaveFeature(t *testing.T) {
 	var (
 		existingUUID  = uuid.MustParse("bb7fe5b6-24a5-4218-bc61-b487bbad9580")
 		generatedUUID = uuid.MustParse("44eeeacf-8d5d-4c68-bbe9-3e58c5ae6915")
+		refTime       = time.Now().Truncate(time.Second)
 		expiryDate    = time.Now().Truncate(time.Second)
 		expiryDateUTC = expiryDate.UTC()
 	)
 
 	tests := map[string]struct {
 		features []feature
+		timeFunc func() time.Time
 		uuidFunc func() (uuid.UUID, error)
 
 		body string
@@ -50,9 +52,8 @@ func TestSaveFeature(t *testing.T) {
 		wantFeatures []feature
 	}{
 		"successfully persist the feature": {
-			uuidFunc: func() (uuid.UUID, error) {
-				return generatedUUID, nil
-			},
+			timeFunc: func() time.Time { return refTime },
+			uuidFunc: func() (uuid.UUID, error) { return generatedUUID, nil },
 
 			body: `{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}`,
 
@@ -64,16 +65,17 @@ func TestSaveFeature(t *testing.T) {
 				ExpiresOn:     &expiryDateUTC,
 				Description:   ptr("Placeholder text for feature description."),
 				Inverted:      false,
+				CreatedAt:     refTime.UTC(),
+				UpdatedAt:     refTime.UTC(),
 			}},
 		},
 		"feature with the same technical name already exists": {
+			timeFunc: func() time.Time { return refTime },
 			features: []feature{{
 				ID:            existingUUID,
 				TechnicalName: "my-feature-1",
 			}},
-			uuidFunc: func() (uuid.UUID, error) {
-				return generatedUUID, nil
-			},
+			uuidFunc: func() (uuid.UUID, error) { return generatedUUID, nil },
 
 			body: `{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}`,
 
@@ -85,9 +87,7 @@ func TestSaveFeature(t *testing.T) {
 			}},
 		},
 		"failed to generate feature ID": {
-			uuidFunc: func() (uuid.UUID, error) {
-				return uuid.Nil, errors.New("test error")
-			},
+			uuidFunc: func() (uuid.UUID, error) { return uuid.Nil, errors.New("test error") },
 
 			body: `{"technicalName":"my-feature-1"}`,
 
@@ -104,11 +104,11 @@ func TestSaveFeature(t *testing.T) {
 			body: `{"foo":"bar"}`,
 
 			wantStatus: http.StatusBadRequest,
-			wantBody:   `{"error":"json: unknown field \"foo\""}`,
+			wantBody:   `{"error":"decode request body: json: unknown field \"foo\""}`,
 		},
 		"missing request body": {
 			wantStatus: http.StatusBadRequest,
-			wantBody:   `{"error":"EOF"}`,
+			wantBody:   `{"error":"decode request body: EOF"}`,
 		},
 	}
 
@@ -133,6 +133,7 @@ func TestSaveFeature(t *testing.T) {
 			setupFeatures(t, *tx, test.features...)
 
 			service := NewService(*tx)
+			service.timeFunc = test.timeFunc
 			service.uuidFunc = test.uuidFunc
 			handler := NewHandler(service)
 
@@ -166,7 +167,7 @@ func (s Store) findAllFeatures(ctx context.Context) ([]feature, error) {
 	rs, err := s.db.QueryContext(
 		ctx,
 		//language=sqlite
-		`SELECT id,display_name,technical_name,expires_on,description,inverted FROM features`,
+		`SELECT id,display_name,technical_name,expires_on,description,inverted,created_at,updated_at FROM features`,
 	)
 	if err != nil {
 		return nil, err
@@ -182,6 +183,8 @@ func (s Store) findAllFeatures(ctx context.Context) ([]feature, error) {
 			&f.ExpiresOn,
 			&f.Description,
 			&f.Inverted,
+			&f.CreatedAt,
+			&f.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

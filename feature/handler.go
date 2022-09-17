@@ -2,6 +2,9 @@ package feature
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/go-chi/chi"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/hlog"
 	"net/http"
 	"time"
@@ -42,7 +45,7 @@ func (h Handler) SaveFeature(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&req); err != nil {
-		render.Error(w, render.TagBadRequest(err))
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("decode request body: %s", err)))
 		return
 	}
 
@@ -56,4 +59,40 @@ func (h Handler) SaveFeature(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+type updateFeatureRequest struct {
+	LastUpdatedAt time.Time          `json:"lastUpdatedAt"`
+	Feature       saveFeatureRequest `json:"feature"`
+}
+
+// UpdateFeature updates an existing feature.
+func (h Handler) UpdateFeature(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "featureId"))
+	if err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("parse feature id: %s", err)))
+		return
+	}
+
+	var req updateFeatureRequest
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("decode request body: %s", err)))
+		return
+	}
+
+	f := req.Feature.toFeature()
+	f.ID = id
+	if err := h.service.updateFeature(r.Context(), req.LastUpdatedAt.UTC(), f); err != nil {
+		hlog.FromRequest(r).
+			Error().
+			Err(err).
+			Msg("failed to update feature")
+		render.Error(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

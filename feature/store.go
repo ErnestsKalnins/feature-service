@@ -4,6 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 // NewStore initializes and returns a new Store.
@@ -62,8 +66,44 @@ func (s Store) saveFeature(ctx context.Context, f feature) error {
 	_, err := s.db.ExecContext(
 		ctx,
 		//language=sqlite
-		`INSERT INTO features (id,display_name,technical_name,expires_on,description) VALUES (?,?,?,?,?)`,
-		f.ID, f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description,
+		`INSERT INTO features (id,display_name,technical_name,expires_on,description,created_at,updated_at) VALUES (?,?,?,?,?,?,?)`,
+		f.ID, f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.CreatedAt, f.UpdatedAt,
 	)
 	return err
+}
+
+func (s Store) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f feature) error {
+	res, err := s.db.ExecContext(
+		ctx,
+		//language=sqlite
+		`UPDATE features SET display_name=?, technical_name=?, expires_on=?, description=?, updated_at=? WHERE id=? AND updated_at=?`,
+		f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.UpdatedAt, f.ID, lastUpdatedAt,
+	)
+	if err != nil {
+		return err
+	}
+
+	rs, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rs == 0 {
+		// Unfortunately, there is no way to determine whether update failed due to the
+		// row not existing, or due to updating based on stale data.
+		return errFeatureNotFound{id: f.ID}
+	}
+	return nil
+}
+
+type errFeatureNotFound struct {
+	id uuid.UUID
+}
+
+func (e errFeatureNotFound) Error() string {
+	return fmt.Sprintf("feature %s does not exist", e.id)
+}
+
+func (e errFeatureNotFound) Code() int {
+	return http.StatusNotFound
 }

@@ -65,8 +65,9 @@ func main() {
 		}),
 	)
 
-	r.Route("/features", func(r chi.Router) {
+	r.Route("/api/v1/features", func(r chi.Router) {
 		r.Post("/", featureHandler.SaveFeature)
+		r.Put("/{featureId}", featureHandler.UpdateFeature)
 	})
 
 	server := http.Server{
