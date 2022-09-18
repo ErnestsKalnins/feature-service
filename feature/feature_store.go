@@ -82,8 +82,8 @@ func (s Store) saveFeature(ctx context.Context, f feature) error {
 	_, err := s.db.ExecContext(
 		ctx,
 		//language=sqlite
-		`INSERT INTO features (id,display_name,technical_name,expires_on,description,created_at,updated_at) VALUES (?,?,?,?,?,?,?)`,
-		f.ID, f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.CreatedAt, f.UpdatedAt,
+		`INSERT INTO features (id,display_name,technical_name,expires_on,description,inverted,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)`,
+		f.ID, f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.Inverted, f.CreatedAt, f.UpdatedAt,
 	)
 	return err
 }
@@ -92,8 +92,8 @@ func (s Store) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f fea
 	res, err := s.db.ExecContext(
 		ctx,
 		//language=sqlite
-		`UPDATE features SET display_name=?, technical_name=?, expires_on=?, description=?, updated_at=? WHERE id=? AND updated_at=?`,
-		f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.UpdatedAt, f.ID, lastUpdatedAt,
+		`UPDATE features SET display_name=?, technical_name=?, expires_on=?, description=?, inverted=?, updated_at=? WHERE id=? AND updated_at=?`,
+		f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.Inverted, f.UpdatedAt, f.ID, lastUpdatedAt,
 	)
 	if err != nil {
 		return err

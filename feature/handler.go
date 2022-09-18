@@ -27,6 +27,7 @@ type saveFeatureRequest struct {
 	TechnicalName string     `json:"technicalName"`
 	ExpiresOn     *time.Time `json:"expiresOn"`
 	Description   *string    `json:"description"`
+	Inverted      bool       `json:"inverted"`
 }
 
 func (r saveFeatureRequest) toFeature() feature {
@@ -35,6 +36,7 @@ func (r saveFeatureRequest) toFeature() feature {
 		TechnicalName: r.TechnicalName,
 		ExpiresOn:     r.ExpiresOn,
 		Description:   r.Description,
+		Inverted:      r.Inverted,
 	}
 }
 
