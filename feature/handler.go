@@ -87,7 +87,7 @@ func (h Handler) UpdateFeature(w http.ResponseWriter, r *http.Request) {
 
 	f := req.Feature.toFeature()
 	f.ID = id
-	if err := h.service.updateFeature(r.Context(), req.LastUpdatedAt.UTC(), f); err != nil {
+	if err := h.service.updateFeature(r.Context(), req.LastUpdatedAt, f); err != nil {
 		hlog.FromRequest(r).
 			Error().
 			Err(err).
@@ -119,6 +119,40 @@ func (h Handler) SaveArchivedFeature(w http.ResponseWriter, r *http.Request) {
 			Error().
 			Err(err).
 			Msg("failed to archive feature")
+		render.Error(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}
+
+type saveFeatureCustomersRequest struct {
+	CustomerIDs []string `json:"customerIds"`
+}
+
+// SaveFeatureCustomers persists the given customers to have access to the
+// feature.
+func (h Handler) SaveFeatureCustomers(w http.ResponseWriter, r *http.Request) {
+	featureID, err := uuid.Parse(chi.URLParam(r, "featureId"))
+	if err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("parse feature id: %s", err)))
+		return
+	}
+
+	var req saveFeatureCustomersRequest
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("decode request body: %s", err)))
+		return
+	}
+
+	if err := h.service.addCustomersToFeature(r.Context(), featureID, req.CustomerIDs); err != nil {
+		hlog.FromRequest(r).
+			Error().
+			Err(err).
+			Msg("failed to add customers to feature")
 		render.Error(w, err)
 		return
 	}

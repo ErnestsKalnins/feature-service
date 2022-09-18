@@ -68,7 +68,11 @@ func main() {
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/features", func(r chi.Router) {
 			r.Post("/", featureHandler.SaveFeature)
-			r.Put("/{featureId}", featureHandler.UpdateFeature)
+
+			r.Route("/{featureId}", func(r chi.Router) {
+				r.Put("/", featureHandler.UpdateFeature)
+				r.Post("/customers", featureHandler.SaveFeatureCustomers)
+			})
 		})
 
 		r.Route("/archived_features", func(r chi.Router) {

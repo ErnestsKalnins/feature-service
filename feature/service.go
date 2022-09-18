@@ -3,6 +3,7 @@ package feature
 import (
 	"context"
 	"database/sql"
+	"feature/pkg/render"
 	"fmt"
 	"github.com/google/uuid"
 	"time"
@@ -62,7 +63,7 @@ func (svc Service) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f
 		*f.ExpiresOn = f.ExpiresOn.UTC()
 	}
 
-	if err := svc.store.updateFeature(ctx, lastUpdatedAt, f); err != nil {
+	if err := svc.store.updateFeature(ctx, lastUpdatedAt.UTC(), f); err != nil {
 		return fmt.Errorf("update feature: %w", err)
 	}
 
@@ -96,6 +97,33 @@ func (svc Service) archiveFeature(ctx context.Context, featureID uuid.UUID) erro
 
 	if err := commit(); err != nil {
 		return fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+var errNoCustomers = render.NewBadRequest("no customer IDs given")
+
+func (svc Service) addCustomersToFeature(ctx context.Context, featureID uuid.UUID, customerIDs []string) error {
+	if len(customerIDs) == 0 {
+		return errNoCustomers
+	}
+
+	var customers []customer
+	for _, customerID := range customerIDs {
+		id, err := svc.uuidFunc()
+		if err != nil {
+			return fmt.Errorf("generate customer feature id: %w", err)
+		}
+		customers = append(customers, customer{
+			ID:         id,
+			FeatureID:  featureID,
+			CustomerID: customerID,
+		})
+	}
+
+	if err := svc.store.saveCustomers(ctx, customers...); err != nil {
+		return fmt.Errorf("save customers: %w", err)
 	}
 
 	return nil

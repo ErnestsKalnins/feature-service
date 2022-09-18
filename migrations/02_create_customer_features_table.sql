@@ -11,5 +11,6 @@ CREATE TABLE customer_features
     id          BLOB PRIMARY KEY,
     customer_id TEXT NOT NULL,
     feature_id  BLOB NOT NULL,
-    FOREIGN     KEY (feature_id) REFERENCES feature(id) ON DELETE CASCADE
+    FOREIGN KEY (feature_id) REFERENCES features (id) ON DELETE CASCADE,
+    UNIQUE (customer_id, feature_id)
 );
