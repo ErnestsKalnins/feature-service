@@ -3,6 +3,9 @@
 -- necessity for the application to view what features are active
 -- for a customer.
 
+-- I assume that for archived features, it is not necessary to maintain
+-- the list of customer IDs it is active for.
+
 CREATE TABLE customer_features
 (
     id          BLOB PRIMARY KEY,

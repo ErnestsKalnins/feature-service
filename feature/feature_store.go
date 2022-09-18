@@ -3,6 +3,7 @@ package feature
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -32,34 +33,49 @@ type db interface {
 	PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 }
 
-func (s Store) beginTx(ctx context.Context, opts *sql.TxOptions) (*Store, error) {
+func (s Store) beginTx(ctx context.Context, opts *sql.TxOptions) (*Store, func() error, func() error, error) {
 	switch v := s.db.(type) {
 	case *sql.DB:
 		tx, err := v.BeginTx(ctx, opts)
 		if err != nil {
-			return nil, fmt.Errorf("begin transaction: %w", err)
+			return nil, nil, nil, fmt.Errorf("begin transaction: %w", err)
 		}
-		return &Store{db: tx}, nil
+		return &Store{db: tx}, tx.Commit, tx.Rollback, nil
 	case *sql.Tx:
-		// Transaction already in progress, return self.
-		return &s, nil
+		// Transaction already in progress, return self. We return a noop Commit and
+		// Rollback func in order to allow the first call to `beginTx` to control the
+		// transaction.
+		noop := func() error { return nil }
+		return &s, noop, noop, nil
 	default:
-		return nil, fmt.Errorf("unexpected db type: %T", v)
+		return nil, nil, nil, fmt.Errorf("unexpected db type: %T", v)
 	}
 }
 
-func (s Store) commitTx() error {
-	if tx, ok := s.db.(*sql.Tx); ok {
-		return tx.Commit()
-	}
-	return nil
-}
+func (s Store) findFeature(ctx context.Context, id uuid.UUID) (*feature, error) {
+	r := s.db.QueryRowContext(
+		ctx,
+		//language=sqlite
+		`SELECT display_name,technical_name,expires_on,description,inverted,created_at,updated_at FROM features WHERE id=?`,
+		id,
+	)
 
-func (s Store) rollbackTx() error {
-	if tx, ok := s.db.(*sql.Tx); ok {
-		return tx.Rollback()
+	f := feature{ID: id}
+	if err := r.Scan(
+		&f.DisplayName,
+		&f.TechnicalName,
+		&f.ExpiresOn,
+		&f.Description,
+		&f.Inverted,
+		&f.CreatedAt,
+		&f.UpdatedAt,
+	); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errFeatureNotFound{id: id}
+		}
+		return nil, err
 	}
-	return nil
+	return &f, nil
 }
 
 func (s Store) saveFeature(ctx context.Context, f feature) error {
@@ -106,4 +122,14 @@ func (e errFeatureNotFound) Error() string {
 
 func (e errFeatureNotFound) Code() int {
 	return http.StatusNotFound
+}
+
+func (s Store) deleteFeature(ctx context.Context, featureID uuid.UUID) error {
+	_, err := s.db.ExecContext(
+		ctx,
+		//language=sqlite
+		`DELETE FROM features WHERE id=?`,
+		featureID,
+	)
+	return err
 }

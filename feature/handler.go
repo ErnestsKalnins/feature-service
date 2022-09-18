@@ -96,3 +96,30 @@ func (h Handler) UpdateFeature(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+type createArchivedFeatureRequest struct {
+	FeatureID uuid.UUID `json:"featureId"`
+}
+
+// SaveArchivedFeature archives an existing feature.
+func (h Handler) SaveArchivedFeature(w http.ResponseWriter, r *http.Request) {
+	var req createArchivedFeatureRequest
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("decode request body: %s", err)))
+		return
+	}
+
+	if err := h.service.archiveFeature(r.Context(), req.FeatureID); err != nil {
+		hlog.FromRequest(r).
+			Error().
+			Err(err).
+			Msg("failed to archive feature")
+		render.Error(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+}

@@ -117,7 +117,7 @@ func TestSaveFeature(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			tx, err := store.beginTx(context.Background(), &sql.TxOptions{
+			tx, _, rollback, err := store.beginTx(context.Background(), &sql.TxOptions{
 				Isolation: sql.LevelReadCommitted,
 			})
 			if err != nil {
@@ -125,7 +125,7 @@ func TestSaveFeature(t *testing.T) {
 			}
 
 			t.Cleanup(func() {
-				if err := tx.rollbackTx(); err != nil {
+				if err := rollback(); err != nil {
 					t.Errorf("failed to rollback the transaction: %s\n", err)
 				}
 			})

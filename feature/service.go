@@ -2,6 +2,7 @@ package feature
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/google/uuid"
 	"time"
@@ -63,6 +64,38 @@ func (svc Service) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f
 
 	if err := svc.store.updateFeature(ctx, lastUpdatedAt, f); err != nil {
 		return fmt.Errorf("update feature: %w", err)
+	}
+
+	return nil
+}
+
+func (svc Service) archiveFeature(ctx context.Context, featureID uuid.UUID) error {
+	tx, commit, rollback, err := svc.store.beginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelReadCommitted,
+	})
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer rollback()
+
+	f, err := tx.findFeature(ctx, featureID)
+	if err != nil {
+		return fmt.Errorf("find feature: %w", err)
+	}
+
+	now := svc.timeFunc().UTC()
+	f.CreatedAt, f.UpdatedAt = now, now
+
+	if err := tx.saveArchivedFeature(ctx, *f); err != nil {
+		return fmt.Errorf("save archived feature: %w", err)
+	}
+
+	if err := tx.deleteFeature(ctx, featureID); err != nil {
+		return fmt.Errorf("delete feature: %w", err)
+	}
+
+	if err := commit(); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
 	}
 
 	return nil
