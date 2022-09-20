@@ -38,11 +38,7 @@ func (svc Service) saveFeature(ctx context.Context, f feature) error {
 	}
 	f.ID = id
 
-	if f.ExpiresOn != nil {
-		*f.ExpiresOn = f.ExpiresOn.UTC()
-	}
-
-	now := svc.timeFunc().UTC()
+	now := svc.timeFunc()
 	f.CreatedAt, f.UpdatedAt = now, now
 
 	if err := svc.store.saveFeature(ctx, f); err != nil {
@@ -57,13 +53,8 @@ func (svc Service) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f
 		return fmt.Errorf("validate feature: %w", err)
 	}
 
-	f.UpdatedAt = svc.timeFunc().UTC()
-
-	if f.ExpiresOn != nil {
-		*f.ExpiresOn = f.ExpiresOn.UTC()
-	}
-
-	if err := svc.store.updateFeature(ctx, lastUpdatedAt.UTC(), f); err != nil {
+	f.UpdatedAt = svc.timeFunc()
+	if err := svc.store.updateFeature(ctx, lastUpdatedAt, f); err != nil {
 		return fmt.Errorf("update feature: %w", err)
 	}
 
@@ -84,7 +75,7 @@ func (svc Service) archiveFeature(ctx context.Context, featureID uuid.UUID) erro
 		return fmt.Errorf("find feature: %w", err)
 	}
 
-	now := svc.timeFunc().UTC()
+	now := svc.timeFunc()
 	f.CreatedAt, f.UpdatedAt = now, now
 
 	if err := tx.saveArchivedFeature(ctx, *f); err != nil {
@@ -127,4 +118,18 @@ func (svc Service) addCustomersToFeature(ctx context.Context, featureID uuid.UUI
 	}
 
 	return nil
+}
+
+var errNoFeatureNames = render.NewBadRequest("no feature technical names given")
+
+func (svc Service) findCustomerFeaturesByTechnicalNames(ctx context.Context, customerID string, technicalNames ...string) ([]customerFeature, error) {
+	if len(technicalNames) == 0 {
+		return nil, errNoFeatureNames
+	}
+
+	cfs, err := svc.store.findCustomerFeaturesByTechnicalNames(ctx, customerID, svc.timeFunc(), technicalNames...)
+	if err != nil {
+		return nil, fmt.Errorf("find customer features by technical names: %w", err)
+	}
+	return cfs, nil
 }

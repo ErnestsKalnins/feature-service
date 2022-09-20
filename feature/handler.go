@@ -159,3 +159,69 @@ func (h Handler) SaveFeatureCustomers(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 }
+
+type featureRequest struct {
+	Request struct {
+		CustomerID string `json:"customerId"`
+		Features   []struct {
+			Name string `json:"name"`
+		} `json:"features"`
+	} `json:"featureRequest"`
+}
+
+func (r featureRequest) featureTechnicalNames() []string {
+	res := make([]string, len(r.Request.Features))
+	for i := range r.Request.Features {
+		res[i] = r.Request.Features[i].Name
+	}
+	return res
+}
+
+func (h Handler) RequestFeaturesAsCustomer(w http.ResponseWriter, r *http.Request) {
+	var req featureRequest
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&req); err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("decode request body: %s", err)))
+		return
+	}
+
+	cfs, err := h.service.findCustomerFeaturesByTechnicalNames(r.Context(), req.Request.CustomerID, req.featureTechnicalNames()...)
+	if err != nil {
+		hlog.FromRequest(r).
+			Error().
+			Err(err).
+			Msg("failed to retrieve features by technical names")
+		render.Error(w, err)
+		return
+	}
+
+	render.JSON(w, responseFromCustomerFeatures(cfs))
+}
+
+func responseFromCustomerFeatures(cfs []customerFeature) customerFeaturesResponse {
+	features := make([]customerFeatureResponse, len(cfs))
+	for i, cf := range cfs {
+		features[i] = customerFeatureResponse{
+			Name:     cf.TechnicalName,
+			Active:   cf.isActive(),
+			Inverted: cf.Inverted,
+			Expired:  cf.Expired,
+		}
+	}
+	return customerFeaturesResponse{
+		Features: features,
+	}
+}
+
+type customerFeaturesResponse struct {
+	Features []customerFeatureResponse `json:"features"`
+}
+
+type customerFeatureResponse struct {
+	Name     string `json:"name"`
+	Active   bool   `json:"active"`
+	Inverted bool   `json:"inverted"`
+	Expired  bool   `json:"expired"`
+}

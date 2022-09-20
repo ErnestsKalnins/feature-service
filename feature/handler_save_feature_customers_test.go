@@ -32,8 +32,6 @@ func TestSaveFeatureCustomers(t *testing.T) {
 		existingUUID  = uuid.MustParse("bb7fe5b6-24a5-4218-bc61-b487bbad9580")
 		generatedUUID = uuid.MustParse("44eeeacf-8d5d-4c68-bbe9-3e58c5ae6915")
 		refTime       = time.Now().Truncate(time.Second)
-		//expiryDate    = time.Now().Truncate(time.Second)
-		//expiryDateUTC = expiryDate.UTC()
 	)
 
 	tests := map[string]struct {

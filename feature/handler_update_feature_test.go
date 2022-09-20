@@ -29,10 +29,9 @@ func TestUpdateFeature(t *testing.T) {
 
 	var (
 		existingUUID  = uuid.MustParse("bb7fe5b6-24a5-4218-bc61-b487bbad9580")
-		lastUpdatedAt = time.Now().AddDate(0, 0, -7).Truncate(time.Second)
-		refTime       = time.Now().Truncate(time.Second)
-		expiryDate    = time.Now().Truncate(time.Second)
-		expiryDateUTC = expiryDate.UTC()
+		lastUpdatedAt = time.Now().AddDate(0, 0, -7).Truncate(time.Second).UTC()
+		refTime       = time.Now().Truncate(time.Second).UTC()
+		expiryDate    = time.Now().Truncate(time.Second).UTC()
 	)
 
 	tests := map[string]struct {
@@ -51,10 +50,10 @@ func TestUpdateFeature(t *testing.T) {
 				ID:            existingUUID,
 				DisplayName:   ptr("Feature #1"),
 				TechnicalName: "feature-1",
-				ExpiresOn:     &expiryDateUTC,
+				ExpiresOn:     &expiryDate,
 				Description:   ptr("Lorem ipsum."),
-				CreatedAt:     lastUpdatedAt.UTC(),
-				UpdatedAt:     lastUpdatedAt.UTC(),
+				CreatedAt:     lastUpdatedAt,
+				UpdatedAt:     lastUpdatedAt,
 			}},
 			timeFunc: func() time.Time { return refTime },
 
@@ -66,10 +65,10 @@ func TestUpdateFeature(t *testing.T) {
 				ID:            existingUUID,
 				DisplayName:   ptr("My Feature 1"),
 				TechnicalName: "my-feature-1",
-				ExpiresOn:     &expiryDateUTC,
+				ExpiresOn:     &expiryDate,
 				Description:   ptr("Placeholder text for feature description."),
-				CreatedAt:     lastUpdatedAt.UTC(),
-				UpdatedAt:     refTime.UTC(),
+				CreatedAt:     lastUpdatedAt,
+				UpdatedAt:     refTime,
 			}},
 		},
 		"updated feature exists, but client is sending a stale update": {
@@ -77,10 +76,10 @@ func TestUpdateFeature(t *testing.T) {
 				ID:            existingUUID,
 				DisplayName:   ptr("Feature #1"),
 				TechnicalName: "feature-1",
-				ExpiresOn:     &expiryDateUTC,
+				ExpiresOn:     &expiryDate,
 				Description:   ptr("Lorem ipsum."),
-				CreatedAt:     lastUpdatedAt.UTC(),
-				UpdatedAt:     lastUpdatedAt.AddDate(0, 0, 1).UTC(),
+				CreatedAt:     lastUpdatedAt,
+				UpdatedAt:     lastUpdatedAt.AddDate(0, 0, 1),
 			}},
 			timeFunc: func() time.Time { return refTime },
 
@@ -93,10 +92,10 @@ func TestUpdateFeature(t *testing.T) {
 				ID:            existingUUID,
 				DisplayName:   ptr("Feature #1"),
 				TechnicalName: "feature-1",
-				ExpiresOn:     &expiryDateUTC,
+				ExpiresOn:     &expiryDate,
 				Description:   ptr("Lorem ipsum."),
-				CreatedAt:     lastUpdatedAt.UTC(),
-				UpdatedAt:     lastUpdatedAt.AddDate(0, 0, 1).UTC(),
+				CreatedAt:     lastUpdatedAt,
+				UpdatedAt:     lastUpdatedAt.AddDate(0, 0, 1),
 			}},
 		},
 		"updated feature doesn't exist": {

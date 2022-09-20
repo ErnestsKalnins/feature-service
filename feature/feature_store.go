@@ -60,40 +60,44 @@ func (s Store) findFeature(ctx context.Context, id uuid.UUID) (*feature, error) 
 		id,
 	)
 
-	f := feature{ID: id}
+	fr := featureRow{ID: id}
 	if err := r.Scan(
-		&f.DisplayName,
-		&f.TechnicalName,
-		&f.ExpiresOn,
-		&f.Description,
-		&f.Inverted,
-		&f.CreatedAt,
-		&f.UpdatedAt,
+		&fr.DisplayName,
+		&fr.TechnicalName,
+		&fr.ExpiresOn,
+		&fr.Description,
+		&fr.Inverted,
+		&fr.CreatedAt,
+		&fr.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errFeatureNotFound{id: id}
 		}
 		return nil, err
 	}
+
+	f := fr.toFeature()
 	return &f, nil
 }
 
 func (s Store) saveFeature(ctx context.Context, f feature) error {
+	r := featureToRow(f)
 	_, err := s.db.ExecContext(
 		ctx,
 		//language=sqlite
 		`INSERT INTO features (id,display_name,technical_name,expires_on,description,inverted,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)`,
-		f.ID, f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.Inverted, f.CreatedAt, f.UpdatedAt,
+		r.ID, r.DisplayName, r.TechnicalName, r.ExpiresOn, r.Description, r.Inverted, r.CreatedAt, r.UpdatedAt,
 	)
 	return err
 }
 
 func (s Store) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f feature) error {
+	r := featureToRow(f)
 	res, err := s.db.ExecContext(
 		ctx,
 		//language=sqlite
 		`UPDATE features SET display_name=?, technical_name=?, expires_on=?, description=?, inverted=?, updated_at=? WHERE id=? AND updated_at=?`,
-		f.DisplayName, f.TechnicalName, f.ExpiresOn, f.Description, f.Inverted, f.UpdatedAt, f.ID, lastUpdatedAt,
+		r.DisplayName, r.TechnicalName, r.ExpiresOn, r.Description, r.Inverted, r.UpdatedAt, r.ID, lastUpdatedAt.UTC(),
 	)
 	if err != nil {
 		return err
@@ -132,4 +136,55 @@ func (s Store) deleteFeature(ctx context.Context, featureID uuid.UUID) error {
 		featureID,
 	)
 	return err
+}
+
+func featureToRow(f feature) featureRow {
+	r := featureRow{
+		ID:            f.ID,
+		TechnicalName: f.TechnicalName,
+		Inverted:      f.Inverted,
+		CreatedAt:     f.CreatedAt.UTC(),
+		UpdatedAt:     f.UpdatedAt.UTC(),
+	}
+	if f.DisplayName != nil {
+		r.DisplayName = sql.NullString{String: *f.DisplayName, Valid: true}
+	}
+	if f.ExpiresOn != nil {
+		r.ExpiresOn = sql.NullTime{Time: f.ExpiresOn.UTC(), Valid: true}
+	}
+	if f.Description != nil {
+		r.Description = sql.NullString{String: *f.Description, Valid: true}
+	}
+	return r
+}
+
+type featureRow struct {
+	ID            uuid.UUID
+	DisplayName   sql.NullString
+	TechnicalName string
+	ExpiresOn     sql.NullTime
+	Description   sql.NullString
+	Inverted      bool
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+func (r featureRow) toFeature() feature {
+	f := feature{
+		ID:            r.ID,
+		TechnicalName: r.TechnicalName,
+		Inverted:      r.Inverted,
+		CreatedAt:     r.CreatedAt,
+		UpdatedAt:     r.UpdatedAt,
+	}
+	if r.DisplayName.Valid {
+		f.DisplayName = &r.DisplayName.String
+	}
+	if r.ExpiresOn.Valid {
+		f.ExpiresOn = &r.ExpiresOn.Time
+	}
+	if r.Description.Valid {
+		f.Description = &r.Description.String
+	}
+	return f
 }

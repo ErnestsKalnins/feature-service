@@ -10,14 +10,15 @@ import (
 
 // A feature toggle.
 type feature struct {
-	ID            uuid.UUID
-	DisplayName   *string
-	TechnicalName string
-	ExpiresOn     *time.Time
-	Description   *string
-	Inverted      bool
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID                 uuid.UUID
+	DisplayName        *string
+	TechnicalName      string
+	ExpiresOn          *time.Time
+	Description        *string
+	Inverted           bool
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	CustomerHasFeature bool
 }
 
 func (f feature) validate() error {

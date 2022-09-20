@@ -35,9 +35,8 @@ func TestSaveFeature(t *testing.T) {
 	var (
 		existingUUID  = uuid.MustParse("bb7fe5b6-24a5-4218-bc61-b487bbad9580")
 		generatedUUID = uuid.MustParse("44eeeacf-8d5d-4c68-bbe9-3e58c5ae6915")
-		refTime       = time.Now().Truncate(time.Second)
-		expiryDate    = time.Now().Truncate(time.Second)
-		expiryDateUTC = expiryDate.UTC()
+		refTime       = time.Now().Truncate(time.Second).UTC()
+		expiryDate    = time.Now().Truncate(time.Second).UTC()
 	)
 
 	tests := map[string]struct {
@@ -62,11 +61,11 @@ func TestSaveFeature(t *testing.T) {
 				ID:            generatedUUID,
 				DisplayName:   ptr("My Feature 1"),
 				TechnicalName: "my-feature-1",
-				ExpiresOn:     &expiryDateUTC,
+				ExpiresOn:     &expiryDate,
 				Description:   ptr("Placeholder text for feature description."),
 				Inverted:      false,
-				CreatedAt:     refTime.UTC(),
-				UpdatedAt:     refTime.UTC(),
+				CreatedAt:     refTime,
+				UpdatedAt:     refTime,
 			}},
 		},
 		"feature with the same technical name already exists": {
@@ -175,20 +174,20 @@ func (s Store) findAllFeatures(ctx context.Context) ([]feature, error) {
 
 	var fs []feature
 	for rs.Next() {
-		var f feature
+		var fr featureRow
 		if err := rs.Scan(
-			&f.ID,
-			&f.DisplayName,
-			&f.TechnicalName,
-			&f.ExpiresOn,
-			&f.Description,
-			&f.Inverted,
-			&f.CreatedAt,
-			&f.UpdatedAt,
+			&fr.ID,
+			&fr.DisplayName,
+			&fr.TechnicalName,
+			&fr.ExpiresOn,
+			&fr.Description,
+			&fr.Inverted,
+			&fr.CreatedAt,
+			&fr.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
-		fs = append(fs, f)
+		fs = append(fs, fr.toFeature())
 	}
 
 	if err := rs.Err(); err != nil {
