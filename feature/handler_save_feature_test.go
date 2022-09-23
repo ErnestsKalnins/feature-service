@@ -162,45 +162,6 @@ func TestSaveFeature(t *testing.T) {
 	}
 }
 
-func (s Store) findAllFeatures(ctx context.Context) ([]feature, error) {
-	rs, err := s.db.QueryContext(
-		ctx,
-		//language=sqlite
-		`SELECT id,display_name,technical_name,expires_on,description,inverted,created_at,updated_at FROM features`,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	var fs []feature
-	for rs.Next() {
-		var fr featureRow
-		if err := rs.Scan(
-			&fr.ID,
-			&fr.DisplayName,
-			&fr.TechnicalName,
-			&fr.ExpiresOn,
-			&fr.Description,
-			&fr.Inverted,
-			&fr.CreatedAt,
-			&fr.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		fs = append(fs, fr.toFeature())
-	}
-
-	if err := rs.Err(); err != nil {
-		return nil, err
-	}
-
-	if err := rs.Close(); err != nil {
-		return nil, err
-	}
-
-	return fs, nil
-}
-
 func assertFeatures(t *testing.T, store Store, want ...feature) {
 	t.Helper()
 	got, err := store.findAllFeatures(context.Background())

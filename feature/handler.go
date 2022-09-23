@@ -40,6 +40,24 @@ func (r saveFeatureRequest) toFeature() feature {
 	}
 }
 
+func (h Handler) ListFeatures(w http.ResponseWriter, r *http.Request) {
+	fs, err := h.service.store.findAllFeatures(r.Context())
+	if err != nil {
+		hlog.FromRequest(r).
+			Error().
+			Err(err).
+			Msg("failed to find all features")
+		render.Error(w, err)
+		return
+	}
+
+	if fs == nil {
+		fs = []feature{}
+	}
+
+	render.JSON(w, fs)
+}
+
 // SaveFeature persists the feature received via JSON request body.
 func (h Handler) SaveFeature(w http.ResponseWriter, r *http.Request) {
 	var req saveFeatureRequest

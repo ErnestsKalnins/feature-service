@@ -2,8 +2,12 @@ package feature
 
 import (
 	"context"
-	"strings"
+	"feature/pkg/slices"
+	"fmt"
 	"time"
+
+	"github.com/doug-martin/goqu/v9"
+	_ "github.com/doug-martin/goqu/v9/dialect/sqlite3"
 )
 
 func (s Store) saveCustomers(ctx context.Context, cs ...customer) error {
@@ -12,23 +16,24 @@ func (s Store) saveCustomers(ctx context.Context, cs ...customer) error {
 		return nil
 	}
 
-	var (
-		qb   strings.Builder
-		args []any
-	)
-
-	qb.WriteString(`INSERT INTO customer_features (id,feature_id,customer_id) VALUES`)
-	for i, c := range cs {
-		if 0 < i {
-			qb.WriteRune(',')
-		}
-		qb.WriteString("(?,?,?)")
-		args = append(args, c.ID, c.FeatureID, c.CustomerID)
+	query, args, err := goqu.Dialect("sqlite3").
+		Insert(goqu.T("customer_features")).
+		Rows(slices.Map(func(c customer) goqu.Record {
+			return goqu.Record{
+				"id":          c.ID,
+				"feature_id":  c.FeatureID,
+				"customer_id": c.CustomerID,
+			}
+		}, cs...)).
+		Prepared(true).
+		ToSQL()
+	if err != nil {
+		return fmt.Errorf("bad query: %w", err)
 	}
 
-	_, err := s.db.ExecContext(
+	_, err = s.db.ExecContext(
 		ctx,
-		qb.String(),
+		query,
 		args...,
 	)
 	return err
@@ -39,31 +44,30 @@ func (s Store) findCustomerFeaturesByTechnicalNames(ctx context.Context, custome
 		return nil, nil
 	}
 
-	var (
-		placeholders = make([]string, len(technicalNames))
-		args         = make([]any, len(technicalNames)+2)
-	)
-
-	args[0], args[1] = customerID, t.Unix()
-	for i, tn := range technicalNames {
-		placeholders[i] = "?"
-		args[i+2] = tn
+	query, args, err := goqu.Dialect("sqlite3").
+		Select(
+			goqu.I("f.technical_name"),
+			goqu.I("f.inverted"),
+			goqu.V(goqu.And(
+				goqu.I("f.expires_on").IsNotNull(),
+				goqu.I("f.expires_on").Lt(t),
+			)).As("expired"),
+			goqu.I("cf.feature_id").IsNotNull().As("customer_has_feature"),
+		).
+		From(goqu.T("features").As("f")).
+		LeftJoin(
+			goqu.T("customer_features").As("cf"),
+			goqu.On(goqu.Ex{
+				"f.id":           goqu.I("cf.feature_id"),
+				"cf.customer_id": customerID,
+			}),
+		).
+		Where(goqu.Ex{"f.technical_name": technicalNames}).
+		Prepared(true).
+		ToSQL()
+	if err != nil {
+		return nil, fmt.Errorf("bad query: %w", err)
 	}
-
-	query := `
-	WITH only_customer_features (feature_id) AS (
-		SELECT
-			feature_id
-		FROM customer_features
-		WHERE customer_id = ?
-	) SELECT
-		f.technical_name,
-		f.inverted,
-		f.expires_on IS NOT NULL AND unixepoch(f.expires_on) < ? AS 'expired',
-		ocf.feature_id IS NOT NULL AS 'customer_has_feature'
-	FROM features f
-		LEFT JOIN only_customer_features ocf ON f.id = ocf.feature_id
-	WHERE f.technical_name IN (` + strings.Join(placeholders, ", ") + `)`
 
 	rs, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {

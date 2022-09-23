@@ -1,0 +1,75 @@
+<div class="w-screen h-screen bg-gray-100 p-32">
+
+  <div class="flex justify-between mb-8 items-center">
+    <div>
+      <h1 class="text-2xl text-bold">
+        Features
+      </h1>
+
+      <span class="text-sm text-gray-600">
+        A list of all feature toggles.
+      </span>
+    </div>
+
+    <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg tracking-wide h-10"
+            routerLink="/new">
+      Add feature
+    </button>
+  </div>
+
+  <div class="bg-gray-50 rounded-lg shadow pb-1">
+    <table class="table-auto w-full">
+      <thead>
+      <tr class="border-b border-gray-200">
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Name</th>
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Description</th>
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Expires On</th>
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Status</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody class="bg-white">
+      <tr *ngFor="let feature of features" class="border-b last:border-b-0 border-gray-200">
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ feature.displayName || feature.technicalName }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ feature.description }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ feature.expiresOn }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ !feature.inverted }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          <a>Edit</a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!--<div class="w-screen h-screen">-->
+<!--  <div class="w-full h-full p-24">-->
+<!--    <div class="w-full flex justify-between mb-8">-->
+<!--      <h1 class="text-2xl">-->
+<!--        Features-->
+<!--      </h1>-->
+
+<!--      <a routerLink="/new" class="p-1.5 text-white bg-blue-500 hover:bg-blue-600 rounded-lg cursor-pointer">-->
+<!--        Add feature-->
+<!--      </a>-->
+<!--    </div>-->
+
+<!--    <div *ngIf="features.length === 0" class="text-center">-->
+<!--      <span>There are no features.</span>-->
+<!--      <br>-->
+<!--      <span>You can <a class="text-cyan-700" routerLink="/new">create one</a>.</span>-->
+<!--    </div>-->
+
+
+<!--  </div>-->
+<!--</div>-->
+

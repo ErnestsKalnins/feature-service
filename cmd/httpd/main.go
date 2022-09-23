@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"github.com/go-chi/cors"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,6 +55,11 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(
+		cors.Handler(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+			Debug:          true,
+		}),
 		hlog.NewHandler(log.Logger),
 		hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 			hlog.FromRequest(r).
@@ -67,6 +73,7 @@ func main() {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Route("/features", func(r chi.Router) {
+			r.Get("/", featureHandler.ListFeatures)
 			r.Post("/", featureHandler.SaveFeature)
 			r.Post("/request", nil) // Couldn't come up with a better name.
 
