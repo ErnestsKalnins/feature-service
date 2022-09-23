@@ -2,7 +2,7 @@
 
   <div class="flex justify-between mb-8 items-center">
     <div>
-      <h1 class="text-2xl text-bold">
+      <h1 class="text-2xl">
         Features
       </h1>
 
@@ -40,10 +40,17 @@
           {{ feature.expiresOn }}
         </td>
         <td class="text-sm py-3 px-4 tracking-wide">
-          {{ !feature.inverted }}
+          <span class="bg-green-200 px-1.5 py-1 rounded-xl text-green-700 font-bold"
+                [class.bg-red-200]="feature.inverted"
+                [class.text-red-700]="feature.inverted"
+          >
+          {{ feature.inverted ? "Off" : "On" }}
+          </span>
         </td>
         <td class="text-sm py-3 px-4 tracking-wide">
-          <a>Edit</a>
+          <a class="text-indigo-600">
+            Edit
+          </a>
         </td>
       </tr>
       </tbody>
@@ -52,23 +59,94 @@
 </div>
 
 <!--<div class="w-screen h-screen">-->
-<!--  <div class="w-full h-full p-24">-->
+<!--  <div class="w-full h-full p-24 flex flex-col items-center">-->
 <!--    <div class="w-full flex justify-between mb-8">-->
 <!--      <h1 class="text-2xl">-->
-<!--        Features-->
+<!--        New Feature-->
 <!--      </h1>-->
 
-<!--      <a routerLink="/new" class="p-1.5 text-white bg-blue-500 hover:bg-blue-600 rounded-lg cursor-pointer">-->
-<!--        Add feature-->
+<!--      <a (click)="goBack()" class="py-3 px-4 text-white bg-gray-500 hover:bg-gray-600 rounded-lg cursor-pointer">-->
+<!--        Back-->
 <!--      </a>-->
 <!--    </div>-->
 
-<!--    <div *ngIf="features.length === 0" class="text-center">-->
-<!--      <span>There are no features.</span>-->
-<!--      <br>-->
-<!--      <span>You can <a class="text-cyan-700" routerLink="/new">create one</a>.</span>-->
-<!--    </div>-->
+<!--    <div class="w-full max-w-lg">-->
+<!--      <div class="flex flex-wrap -mx-3 mb-6">-->
+<!--        <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">-->
+<!--          <label for="technicalName" class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">-->
+<!--            Technical name-->
+<!--          </label>-->
+<!--          <input-->
+<!--            class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"-->
+<!--            id="technicalName"-->
+<!--            type="text"-->
+<!--            placeholder="my-feature"-->
+<!--            [(ngModel)]="feature.technicalName"-->
+<!--          >-->
+<!--        </div>-->
 
+<!--        <div class="w-full md:w-1/2 px-3">-->
+<!--          <label for="displayName" class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">-->
+<!--            Display name-->
+<!--          </label>-->
+<!--          <input-->
+<!--            class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"-->
+<!--            id="displayName"-->
+<!--            type="text"-->
+<!--            placeholder="My Feature"-->
+<!--            [(ngModel)]="feature.displayName"-->
+<!--          >-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="flex flex-wrap -mx-3 mb-6">-->
+<!--        <div class="w-full px-3">-->
+<!--          <label for="description" class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">-->
+<!--            Description-->
+<!--          </label>-->
+<!--          <textarea-->
+<!--            class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"-->
+<!--            id="description"-->
+<!--            type="text"-->
+<!--            placeholder="Lorem ipsum."-->
+<!--            rows="5"-->
+<!--            [(ngModel)]="feature.description"-->
+<!--          ></textarea>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="flex flex-wrap -mx-3 mb-2">-->
+<!--        <div class="w-full md:w-1/2 px-3">-->
+<!--          <label for="expiresOn" class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">-->
+<!--            Expires On-->
+<!--          </label>-->
+<!--          <input-->
+<!--            class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"-->
+<!--            id="expiresOn"-->
+<!--            type="datetime-local"-->
+<!--            [(ngModel)]="feature.expiresOn"-->
+<!--          >-->
+<!--        </div>-->
+<!--        <div class="w-full md:w-1/2 px-3">-->
+<!--          <button-->
+<!--            [class.bg-red-600]="feature.inverted"-->
+<!--            [class.focus:bg-red-700]="feature.inverted"-->
+<!--            class="block w-full bg-green-600 focus:bg-green-700 focus:outline-none text-white uppercase font-bold tracking-wide py-3 px-4 rounded mt-6"-->
+<!--            (click)="invert()"-->
+<!--          >-->
+
+<!--            {{ feature.inverted ? 'Disabled' : 'Enabled' }}-->
+<!--          </button>-->
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <button-->
+<!--        class="block w-full border border-green-600 focus:border-green-700 rounded text-green-600 focus:text-green-700 focus:outline-none py-3 px-4 uppercase font-bold tracking-wide"-->
+<!--        (click)="saveFeature()"-->
+<!--      >-->
+<!--        Save-->
+<!--      </button>-->
+<!--    </div>-->
 
 <!--  </div>-->
 <!--</div>-->

@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {Location} from "@angular/common";
 import {Feature} from "../services/feature";
 import {FeatureService} from "../services/feature.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-new-feature',
@@ -19,7 +20,8 @@ export class NewFeatureComponent implements OnInit {
 
   constructor(
     private featureService: FeatureService,
-    private location: Location
+    private location: Location,
+    private router: Router
   ) {
   }
 
@@ -35,9 +37,12 @@ export class NewFeatureComponent implements OnInit {
   }
 
   saveFeature(): void {
-    console.log(this.feature);
+    const that = this;
     this.featureService.saveFeature(this.feature)
-      .subscribe();
-    // TODO: redirect to list view.
+      .subscribe({
+        complete() {
+          that.router.navigate(['/']);
+        }
+      });
   }
 }
