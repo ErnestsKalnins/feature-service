@@ -1,0 +1,59 @@
+<div class="w-screen h-screen bg-gray-100 p-32">
+
+  <div class="flex justify-between mb-8 items-center">
+    <div>
+      <h1 class="text-2xl">
+        Features
+      </h1>
+
+      <span class="text-sm text-gray-600">
+        A list of all feature toggles.
+      </span>
+    </div>
+
+    <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg tracking-wide h-10"
+            routerLink="/features/new">
+      Add feature
+    </button>
+  </div>
+
+  <div class="bg-gray-50 rounded-lg shadow pb-1">
+    <table class="table-auto w-full">
+      <thead>
+      <tr class="border-b border-gray-200">
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Name</th>
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Description</th>
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Expires On</th>
+        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Status</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody class="bg-white">
+      <tr *ngFor="let feature of features" class="border-b last:border-b-0 border-gray-200">
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ feature.displayName || feature.technicalName }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ feature.description }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          {{ feature.expiresOn }}
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          <span class="bg-green-200 px-1.5 py-1 rounded-xl text-green-700 font-bold"
+                [class.bg-red-200]="feature.inverted"
+                [class.text-red-700]="feature.inverted"
+          >
+          {{ feature.inverted ? "Off" : "On" }}
+          </span>
+        </td>
+        <td class="text-sm py-3 px-4 tracking-wide">
+          <a class="text-indigo-600">
+            Edit
+          </a>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

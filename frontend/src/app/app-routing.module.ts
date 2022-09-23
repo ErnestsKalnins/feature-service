@@ -1,11 +1,16 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {NewFeatureComponent} from "./new-feature/new-feature.component";
-import {FeatureListComponent} from "./feature-list/feature-list.component";
 
 const routes: Routes = [
-  {path: '', component: FeatureListComponent},
-  {path: 'new', component: NewFeatureComponent},
+  {
+    path: '',
+    redirectTo: '/features',
+    pathMatch: 'full'
+  },
+  {
+    path: 'features',
+    loadChildren: () => import('./feature/feature.module').then(m => m.FeatureModule),
+  }
 ];
 
 @NgModule({

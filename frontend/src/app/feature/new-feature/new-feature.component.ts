@@ -41,7 +41,7 @@ export class NewFeatureComponent implements OnInit {
     this.featureService.saveFeature(this.feature)
       .subscribe({
         complete() {
-          that.router.navigate(['/']);
+          that.router.navigate(['/features']);
         }
       });
   }
