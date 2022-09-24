@@ -22,6 +22,8 @@ export class FeatureDetailComponent implements OnInit {
     updatedAt: 0,
   };
 
+  loading = false;
+
   showModal = false;
 
   constructor(
@@ -55,11 +57,16 @@ export class FeatureDetailComponent implements OnInit {
   }
 
   archive(): void {
+    this.loading = true;
     const that = this;
     this.featureService.archiveFeature(this.feature.id!)
       .subscribe({
         complete() {
           that.router.navigate(['/features']);
+        },
+        error(e) {
+          console.log(e);
+          that.loading = false;
         }
       });
   }

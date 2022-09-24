@@ -18,10 +18,11 @@
           Technical name
         </label>
         <input id="technicalName"
-               class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm"
+               class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm disabled:bg-gray-200"
                type="text"
                placeholder="my-feature"
                [(ngModel)]="feature.technicalName"
+               [disabled]="loading"
         >
       </div>
 
@@ -32,10 +33,11 @@
           Display name
         </label>
         <input id="displayName"
-               class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm"
+               class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm disabled:bg-gray-200"
                type="text"
                placeholder="My Feature"
                [(ngModel)]="feature.displayName"
+               [disabled]="loading"
         >
       </div>
 
@@ -46,10 +48,11 @@
           Description
         </label>
         <textarea id="description"
-                  class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm"
+                  class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm disabled:bg-gray-200"
                   placeholder="Lorem ipsum..."
                   rows="5"
                   [(ngModel)]="feature.description"
+                  [disabled]="loading"
         ></textarea>
       </div>
 
@@ -60,10 +63,11 @@
           Expires on
         </label>
         <input id="expiresOn"
-               class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm"
+               class="block mt-1 border border-gray-300 focus:outline-indigo-500 rounded-md px-3 py-1.5 w-full shadow-sm disabled:bg-gray-200"
                type="datetime-local"
                [attr.value]="getExpiredOnDatetime()"
                (change)="setExpiredOnDatetime($event)"
+               [disabled]="loading"
         >
       </div>
 
@@ -83,19 +87,24 @@
                [class.hover:bg-red-700]="feature.inverted"
                [class.focus:bg-green-700]="!feature.inverted"
                [class.focus:bg-red-700]="feature.inverted"
+               [class.disabled:bg-green-700]="!feature.inverted"
+               [class.disabled:bg-red-700]="feature.inverted"
                (click)="invert()"
+               [disabled]="loading"
         >
       </div>
     </div>
 
     <div class="p-6 bg-gray-50 flex items-center justify-end rounded-xl">
-      <button class="mx-1.5 px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base hover:bg-gray-100 focus:bg-gray-100 border border-gray-300 rounded-lg tracking-wide shadow focus:outline-none"
+      <button class="mx-1.5 px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base hover:bg-gray-100 focus:bg-gray-100 border border-gray-300 rounded-lg tracking-wide shadow focus:outline-none disabled:bg-gray-100"
               (click)="goBack()"
+              [disabled]="loading"
       >
         Cancel
       </button>
-      <button class="mx-1.5 px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base bg-indigo-600 focus:bg-indigo-700 hover:bg-indigo-700 text-white rounded-lg tracking-wide shadow focus:outline-none"
+      <button class="mx-1.5 px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base bg-indigo-600 focus:bg-indigo-700 hover:bg-indigo-700 text-white rounded-lg tracking-wide shadow focus:outline-none disabled:bg-indigo-700"
               (click)="saveFeature()"
+              [disabled]="loading"
       >
         Save
       </button>

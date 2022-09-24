@@ -21,6 +21,8 @@ export class EditFeatureComponent implements OnInit {
     updatedAt: 0,
   };
 
+  loading = false;
+
   constructor(
     private location: Location,
     private route: ActivatedRoute,
@@ -62,12 +64,17 @@ export class EditFeatureComponent implements OnInit {
   }
 
   updateFeature(): void {
+    this.loading = true;
     const that = this;
     this.featureService.updateFeature(this.feature)
       .subscribe({
         complete() {
           that.router.navigate(['/features']);
-        }
+        },
+        error(e) {
+          console.log(e);
+          that.loading = false;
+        },
       });
   }
 }

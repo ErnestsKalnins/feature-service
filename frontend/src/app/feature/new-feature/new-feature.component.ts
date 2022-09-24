@@ -20,6 +20,8 @@ export class NewFeatureComponent implements OnInit {
     updatedAt: 0,
   };
 
+  loading = false;
+
   constructor(
     private featureService: FeatureService,
     private location: Location,
@@ -53,11 +55,17 @@ export class NewFeatureComponent implements OnInit {
   }
 
   saveFeature(): void {
+    this.loading = true;
     const that = this;
     this.featureService.saveFeature(this.feature)
       .subscribe({
         complete() {
           that.router.navigate(['/features']);
+        },
+
+        error(e) {
+          console.log(e);
+          that.loading = false;
         }
       });
   }
