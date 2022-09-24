@@ -3,6 +3,8 @@ export interface Feature {
   displayName: string | null,
   technicalName: string,
   description: string | null,
-  expiresOn: string | null,
+  expiresOn: number | null,
   inverted: boolean,
+  createdAt: number,
+  updatedAt: number,
 }

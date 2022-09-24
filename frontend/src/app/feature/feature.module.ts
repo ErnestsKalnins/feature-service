@@ -1,21 +1,21 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {HttpClientModule} from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 
 import {FeatureRoutingModule} from "./feature-routing.module";
 import {FeatureListComponent} from "./feature-list/feature-list.component";
 import {NewFeatureComponent} from "./new-feature/new-feature.component";
+import {EditFeatureComponent} from './edit-feature/edit-feature.component';
 
 @NgModule({
   declarations: [
     FeatureListComponent,
-    NewFeatureComponent
+    NewFeatureComponent,
+    EditFeatureComponent
   ],
   imports: [
     CommonModule,
     FeatureRoutingModule,
-    HttpClientModule,
     FormsModule
   ]
 })

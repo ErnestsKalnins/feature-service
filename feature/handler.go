@@ -2,6 +2,7 @@ package feature
 
 import (
 	"encoding/json"
+	"feature/pkg/slices"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/google/uuid"
@@ -22,24 +23,7 @@ type Handler struct {
 	service Service
 }
 
-type saveFeatureRequest struct {
-	DisplayName   *string    `json:"displayName"`
-	TechnicalName string     `json:"technicalName"`
-	ExpiresOn     *time.Time `json:"expiresOn"`
-	Description   *string    `json:"description"`
-	Inverted      bool       `json:"inverted"`
-}
-
-func (r saveFeatureRequest) toFeature() feature {
-	return feature{
-		DisplayName:   r.DisplayName,
-		TechnicalName: r.TechnicalName,
-		ExpiresOn:     r.ExpiresOn,
-		Description:   r.Description,
-		Inverted:      r.Inverted,
-	}
-}
-
+// ListFeatures renders all features to the client.
 func (h Handler) ListFeatures(w http.ResponseWriter, r *http.Request) {
 	fs, err := h.service.store.findAllFeatures(r.Context())
 	if err != nil {
@@ -51,11 +35,77 @@ func (h Handler) ListFeatures(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if fs == nil {
-		fs = []feature{}
+	render.JSON(w, slices.Map(responseFromFeature, fs...))
+}
+
+func (h Handler) GetFeature(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "featureId"))
+	if err != nil {
+		render.Error(w, render.NewBadRequest(fmt.Sprintf("parse feature id: %s", err)))
+		return
 	}
 
-	render.JSON(w, fs)
+	f, err := h.service.store.findFeature(r.Context(), id)
+	if err != nil {
+		hlog.FromRequest(r).
+			Error().
+			Err(err).
+			Msg("failed to find feature")
+		render.Error(w, err)
+		return
+	}
+
+	render.JSON(w, responseFromFeature(*f))
+}
+
+func responseFromFeature(f feature) featureResponse {
+	res := featureResponse{
+		ID:            f.ID,
+		DisplayName:   f.DisplayName,
+		TechnicalName: f.TechnicalName,
+		Description:   f.Description,
+		Inverted:      f.Inverted,
+		CreatedAt:     f.CreatedAt.UnixMilli(),
+		UpdatedAt:     f.UpdatedAt.UnixMilli(),
+	}
+	if f.ExpiresOn != nil {
+		res.ExpiresOn = new(int64)
+		*res.ExpiresOn = f.ExpiresOn.UnixMilli()
+	}
+	return res
+}
+
+type featureResponse struct {
+	ID            uuid.UUID `json:"id"`
+	DisplayName   *string   `json:"displayName,omitempty"`
+	TechnicalName string    `json:"technicalName"`
+	ExpiresOn     *int64    `json:"expiresOn,omitempty"`
+	Description   *string   `json:"description,omitempty"`
+	Inverted      bool      `json:"inverted"`
+	CreatedAt     int64     `json:"createdAt"`
+	UpdatedAt     int64     `json:"updatedAt"`
+}
+
+type saveFeatureRequest struct {
+	DisplayName   *string `json:"displayName"`
+	TechnicalName string  `json:"technicalName"`
+	ExpiresOn     *int64  `json:"expiresOn"`
+	Description   *string `json:"description"`
+	Inverted      bool    `json:"inverted"`
+}
+
+func (r saveFeatureRequest) toFeature() feature {
+	res := feature{
+		DisplayName:   r.DisplayName,
+		TechnicalName: r.TechnicalName,
+		Description:   r.Description,
+		Inverted:      r.Inverted,
+	}
+	if r.ExpiresOn != nil {
+		res.ExpiresOn = new(time.Time)
+		*res.ExpiresOn = time.Unix(*r.ExpiresOn, 0)
+	}
+	return res
 }
 
 // SaveFeature persists the feature received via JSON request body.
@@ -82,7 +132,7 @@ func (h Handler) SaveFeature(w http.ResponseWriter, r *http.Request) {
 }
 
 type updateFeatureRequest struct {
-	LastUpdatedAt time.Time          `json:"lastUpdatedAt"`
+	LastUpdatedAt int64              `json:"lastUpdatedAt"`
 	Feature       saveFeatureRequest `json:"feature"`
 }
 
@@ -105,7 +155,7 @@ func (h Handler) UpdateFeature(w http.ResponseWriter, r *http.Request) {
 
 	f := req.Feature.toFeature()
 	f.ID = id
-	if err := h.service.updateFeature(r.Context(), req.LastUpdatedAt, f); err != nil {
+	if err := h.service.updateFeature(r.Context(), time.UnixMilli(req.LastUpdatedAt), f); err != nil {
 		hlog.FromRequest(r).
 			Error().
 			Err(err).

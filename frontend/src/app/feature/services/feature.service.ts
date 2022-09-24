@@ -18,6 +18,10 @@ export class FeatureService {
     return this.http.get<Feature[]>(this.featuresUrl);
   }
 
+  getFeature(id: string): Observable<Feature> {
+    return this.http.get<Feature>(this.featuresUrl + `/${id}`);
+  }
+
   saveFeature({technicalName, displayName, description, inverted, expiresOn}: Feature): Observable<HttpResponse<void>> {
     const expiresOnRFC3339 = expiresOn === null
       ? null
@@ -30,5 +34,26 @@ export class FeatureService {
       inverted,
       expiresOn: expiresOnRFC3339
     });
+  }
+
+  updateFeature({
+                  id,
+                  updatedAt,
+                  displayName,
+                  technicalName,
+                  expiresOn,
+                  description,
+                  inverted
+                }: Feature): Observable<HttpResponse<void>> {
+    return this.http.put<HttpResponse<void>>(this.featuresUrl + `/${id}`, {
+      lastUpdatedAt: updatedAt,
+      feature: {
+        displayName,
+        technicalName,
+        expiresOn,
+        description,
+        inverted,
+      }
+    })
   }
 }

@@ -78,6 +78,7 @@ func main() {
 			r.Post("/request", nil) // Couldn't come up with a better name.
 
 			r.Route("/{featureId}", func(r chi.Router) {
+				r.Get("/", featureHandler.GetFeature)
 				r.Put("/", featureHandler.UpdateFeature)
 				r.Post("/customers", featureHandler.SaveFeatureCustomers)
 			})

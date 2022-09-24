@@ -1,14 +1,15 @@
 import {Component, OnInit} from '@angular/core';
 import {Location} from "@angular/common";
-import {Feature} from "../services/feature";
+import {ActivatedRoute, Router} from "@angular/router";
+import {switchMap} from "rxjs";
 import {FeatureService} from "../services/feature.service";
-import {Router} from "@angular/router";
+import {Feature} from "../services/feature";
 
 @Component({
-  selector: 'app-new-feature',
-  templateUrl: './new-feature.component.html',
+  selector: 'app-edit-feature',
+  templateUrl: './edit-feature.component.html',
 })
-export class NewFeatureComponent implements OnInit {
+export class EditFeatureComponent implements OnInit {
   feature: Feature = {
     id: null,
     technicalName: '',
@@ -21,21 +22,29 @@ export class NewFeatureComponent implements OnInit {
   };
 
   constructor(
-    private featureService: FeatureService,
     private location: Location,
-    private router: Router
+    private route: ActivatedRoute,
+    private router: Router,
+    private featureService: FeatureService
   ) {
   }
 
   ngOnInit(): void {
-  }
-
-  goBack(): void {
-    this.location.back();
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        return this.featureService.getFeature(params.get('featureId')!);
+      })
+    ).subscribe(feature => {
+      this.feature = feature;
+    });
   }
 
   invert(): void {
     this.feature.inverted = !this.feature.inverted;
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   getExpiredOnDatetime(): string | null {
@@ -43,7 +52,7 @@ export class NewFeatureComponent implements OnInit {
       return null
     }
     const utc = new Date(this.feature.expiresOn);
-    return new Date(utc.getTime() - utc.getTimezoneOffset()*60*1000)
+    return new Date(utc.getTime() - utc.getTimezoneOffset() * 60 * 1000)
       .toISOString()
       .slice(0, -1);
   }
@@ -52,9 +61,9 @@ export class NewFeatureComponent implements OnInit {
     this.feature.expiresOn = new Date(e.target.value).valueOf();
   }
 
-  saveFeature(): void {
+  updateFeature(): void {
     const that = this;
-    this.featureService.saveFeature(this.feature)
+    this.featureService.updateFeature(this.feature)
       .subscribe({
         complete() {
           that.router.navigate(['/features']);

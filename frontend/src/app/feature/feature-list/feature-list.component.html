@@ -1,4 +1,4 @@
-<div class="w-screen h-screen bg-gray-100 p-32">
+<div class="w-screen min-h-screen h-max bg-gray-100 p-32">
 
   <div class="flex justify-between mb-8 items-center">
     <div>
@@ -12,7 +12,7 @@
     </div>
 
     <button class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg tracking-wide h-10"
-            routerLink="/features/new">
+            routerLink="new">
       Add feature
     </button>
   </div>
@@ -37,7 +37,7 @@
           {{ feature.description }}
         </td>
         <td class="text-sm py-3 px-4 tracking-wide">
-          {{ feature.expiresOn }}
+          {{ feature.expiresOn | date: 'medium' }}
         </td>
         <td class="text-sm py-3 px-4 tracking-wide">
           <span class="bg-green-200 px-1.5 py-1 rounded-xl text-green-700 font-bold"
@@ -48,7 +48,9 @@
           </span>
         </td>
         <td class="text-sm py-3 px-4 tracking-wide">
-          <a class="text-indigo-600">
+          <a class="text-indigo-600"
+             [routerLink]="[feature.id, 'edit']"
+          >
             Edit
           </a>
         </td>

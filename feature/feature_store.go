@@ -135,8 +135,8 @@ func (s Store) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f fea
 	res, err := s.db.ExecContext(
 		ctx,
 		//language=sqlite
-		`UPDATE features SET display_name=?, technical_name=?, expires_on=?, description=?, inverted=?, updated_at=? WHERE id=? AND updated_at=?`,
-		r.DisplayName, r.TechnicalName, r.ExpiresOn, r.Description, r.Inverted, r.UpdatedAt, r.ID, lastUpdatedAt.UTC(),
+		`UPDATE features SET display_name=?, technical_name=?, expires_on=?, description=?, inverted=?, updated_at=? WHERE id=? AND unixepoch(updated_at)=?`,
+		r.DisplayName, r.TechnicalName, r.ExpiresOn, r.Description, r.Inverted, r.UpdatedAt, r.ID, lastUpdatedAt.Unix(),
 	)
 	if err != nil {
 		return err

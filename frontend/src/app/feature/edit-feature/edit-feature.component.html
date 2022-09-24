@@ -1,11 +1,11 @@
 <div class="max-w-screen min-h-screen h-fit bg-gray-100 p-32 flex">
   <div class="w-1/3">
     <h1 class="text-2xl">
-      New feature
+      Edit feature
     </h1>
 
     <span class="text-sm text-gray-600">
-      Create a new feature toggle.
+      Edit an existing feature toggle.
     </span>
   </div>
   <div class="w-2/3 h-fit bg-white rounded-xl shadow flex flex-col justify-between">
@@ -74,8 +74,8 @@
         </label>
         <input id="inverted"
                type="button"
-               value="{{ feature.inverted ? 'Disabled' : 'Enabled' }}"
                class="mt-1 px-4 py-2 bg-green-600 focus:outline-none focus:bg-green-700 hover:bg-green-700 text-white font-bold cursor-pointer rounded-lg tracking-wide shadow"
+               value="{{ feature.inverted ? 'Disabled' : 'Enabled' }}"
                [class.bg-green-600]="!feature.inverted"
                [class.bg-red-600]="feature.inverted"
                [class.hover:bg-green-700]="!feature.inverted"
@@ -88,15 +88,17 @@
     </div>
 
     <div class="p-6 bg-gray-50 flex items-center justify-end rounded-xl">
-      <button class="mx-2 px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 border border-gray-300 rounded-lg tracking-wide shadow focus:outline-none"
-              (click)="goBack()"
+      <button
+        class="mx-2 px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 border border-gray-300 rounded-lg tracking-wide shadow focus:outline-none"
+        (click)="goBack()"
       >
         Cancel
       </button>
-      <button class="mx-1.5 px-4 py-2 bg-indigo-600 focus:bg-indigo-700 hover:bg-indigo-700 text-white rounded-lg tracking-wide shadow focus:outline-none"
-              (click)="saveFeature()"
+      <button
+        class="mx-1.5 px-4 py-2 bg-indigo-600 focus:bg-indigo-700 hover:bg-indigo-700 text-white rounded-lg tracking-wide shadow focus:outline-none"
+        (click)="updateFeature()"
       >
-        Save
+        Update
       </button>
     </div>
   </div>
