@@ -58,7 +58,6 @@ func main() {
 		cors.Handler(cors.Options{
 			AllowedOrigins: []string{"*"},
 			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-			Debug:          true,
 		}),
 		hlog.NewHandler(log.Logger),
 		hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {

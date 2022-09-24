@@ -103,7 +103,7 @@ func (r saveFeatureRequest) toFeature() feature {
 	}
 	if r.ExpiresOn != nil {
 		res.ExpiresOn = new(time.Time)
-		*res.ExpiresOn = time.Unix(*r.ExpiresOn, 0)
+		*res.ExpiresOn = time.UnixMilli(*r.ExpiresOn)
 	}
 	return res
 }
