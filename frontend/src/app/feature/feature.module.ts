@@ -6,12 +6,14 @@ import {FeatureRoutingModule} from "./feature-routing.module";
 import {FeatureListComponent} from "./feature-list/feature-list.component";
 import {NewFeatureComponent} from "./new-feature/new-feature.component";
 import {EditFeatureComponent} from './edit-feature/edit-feature.component';
+import { FeatureDetailComponent } from './feature-detail/feature-detail.component';
 
 @NgModule({
   declarations: [
     FeatureListComponent,
     NewFeatureComponent,
-    EditFeatureComponent
+    EditFeatureComponent,
+    FeatureDetailComponent
   ],
   imports: [
     CommonModule,

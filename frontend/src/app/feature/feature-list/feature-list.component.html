@@ -1,4 +1,4 @@
-<div class="w-screen min-h-screen h-max bg-gray-100 p-32">
+<div class="max-w-screen min-h-screen h-max bg-gray-100 p-32">
 
   <div class="flex justify-between mb-8 items-center">
     <div>
@@ -29,7 +29,10 @@
       </tr>
       </thead>
       <tbody class="bg-white">
-      <tr *ngFor="let feature of features" class="border-b last:border-b-0 border-gray-200">
+      <tr *ngFor="let feature of features"
+          class="border-b last:border-b-0 border-gray-200 hover:shadow-md cursor-pointer"
+          [routerLink]="[feature.id]"
+      >
         <td class="text-sm py-3 px-4 tracking-wide">
           {{ feature.displayName || feature.technicalName }}
         </td>
