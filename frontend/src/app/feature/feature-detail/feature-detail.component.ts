@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Router} from "@angular/router";
 import {switchMap} from "rxjs";
 import {Location} from "@angular/common";
 
@@ -22,8 +22,11 @@ export class FeatureDetailComponent implements OnInit {
     updatedAt: 0,
   };
 
+  showModal = false;
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private location: Location,
     private featureService: FeatureService,
   ) {
@@ -43,4 +46,21 @@ export class FeatureDetailComponent implements OnInit {
     this.location.back();
   }
 
+  startArchive(): void {
+    this.showModal = true;
+  }
+
+  cancelArchive(): void {
+    this.showModal = false;
+  }
+
+  archive(): void {
+    const that = this;
+    this.featureService.archiveFeature(this.feature.id!)
+      .subscribe({
+        complete() {
+          that.router.navigate(['/features']);
+        }
+      });
+  }
 }

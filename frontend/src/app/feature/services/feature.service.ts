@@ -8,6 +8,7 @@ import {Feature} from "./feature";
 })
 export class FeatureService {
   private featuresUrl = 'http://localhost:8080/api/v1/features';
+  private archivedFeaturesUrl = 'http://localhost:8080/api/v1/archived_features';
 
   constructor(
     private http: HttpClient,
@@ -55,5 +56,9 @@ export class FeatureService {
         inverted,
       }
     })
+  }
+
+  archiveFeature(featureId: string): Observable<HttpResponse<void>> {
+    return this.http.post<HttpResponse<void>>(this.archivedFeaturesUrl, {featureId})
   }
 }
