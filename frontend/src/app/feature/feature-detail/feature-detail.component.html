@@ -1,5 +1,5 @@
 <div class="min-w-screen min-h-screen h-max bg-gray-100 sm:p-12 md:p-16 lg:p-32 flex">
-  <div class="bg-white w-full h-full rounded-lg shadow">
+  <div class="bg-white w-full rounded-lg shadow flex flex-col">
     <div class="p-2 sm:p-6 border-b border-gray-200">
       <h1 class="text-sm sm:text-xl">
         Feature Information
@@ -10,59 +10,73 @@
       </span>
     </div>
 
-    <div class="flex flex-col sm:flex-row bg-gray-50 p-2 sm:p-6">
-      <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
-        Technical name
-      </h2>
-
-      <h2 class="sm:w-2/3 text-sm sm:text-base">
-        {{ feature.technicalName }}
-      </h2>
+    <div *ngIf="initialLoading" class="flex grow items-center justify-center">
+      <svg class="animate-spin -ml-1 mr-3 h-16 w-16 text-indigo-500"
+           xmlns="http://www.w3.org/2000/svg"
+           fill="none"
+           viewBox="0 0 24 24"
+      >
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
     </div>
 
-    <div class="flex flex-col sm:flex-row p-2 sm:p-6">
-      <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
-        Display name
-      </h2>
+    <div *ngIf="!initialLoading">
+      <div class="flex flex-col sm:flex-row bg-gray-50 p-2 sm:p-6">
+        <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
+          Technical name
+        </h2>
 
-      <h2 class="sm:w-2/3 text-sm sm:text-base">
-        {{ feature.displayName }}
-      </h2>
-    </div>
+        <h2 class="sm:w-2/3 text-sm sm:text-base">
+          {{ feature.technicalName }}
+        </h2>
+      </div>
 
-    <div class="flex flex-col sm:flex-row bg-gray-50 p-2 sm:p-6">
-      <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
-        Description
-      </h2>
+      <div class="flex flex-col sm:flex-row p-2 sm:p-6">
+        <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
+          Display name
+        </h2>
 
-      <h2 class="sm:w-2/3 text-sm sm:text-base">
-        {{ feature.description }}
-      </h2>
-    </div>
+        <h2 class="sm:w-2/3 text-sm sm:text-base">
+          {{ feature.displayName }}
+        </h2>
+      </div>
 
-    <div class="flex flex-col sm:flex-row p-2 sm:p-6">
-      <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
-        Expires on
-      </h2>
+      <div class="flex flex-col sm:flex-row bg-gray-50 p-2 sm:p-6">
+        <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
+          Description
+        </h2>
 
-      <h2 class="sm:w-2/3 text-sm sm:text-base">
-        {{ feature.expiresOn ? (feature.expiresOn | date: 'long') : '-' }}
-      </h2>
-    </div>
+        <h2 class="sm:w-2/3 text-sm sm:text-base">
+          {{ feature.description }}
+        </h2>
+      </div>
 
-    <div class="flex flex-col sm:flex-row bg-gray-50 p-2 sm:p-6">
-      <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
-        Status
-      </h2>
+      <div class="flex flex-col sm:flex-row p-2 sm:p-6">
+        <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
+          Expires on
+        </h2>
 
-      <h2 class="sm:w-2/3">
+        <h2 class="sm:w-2/3 text-sm sm:text-base">
+          {{ feature.expiresOn ? (feature.expiresOn | date: 'long') : '-' }}
+        </h2>
+      </div>
+
+      <div class="flex flex-col sm:flex-row bg-gray-50 p-2 sm:p-6">
+        <h2 class="sm:w-1/3 text-sm sm:text-base text-gray-600 mb-1 sm:mb-0">
+          Status
+        </h2>
+
+        <h2 class="sm:w-2/3">
           <span class="bg-green-200 px-1.5 py-1 rounded-xl text-green-700 font-bold text-sm sm:text-base"
                 [class.bg-red-200]="feature.inverted"
                 [class.text-red-700]="feature.inverted"
           >
         {{ feature.inverted ? 'Off' : 'On' }}
         </span>
-      </h2>
+        </h2>
+      </div>
     </div>
 
     <div class="p-6 border-t border-gray-200 flex justify-end">

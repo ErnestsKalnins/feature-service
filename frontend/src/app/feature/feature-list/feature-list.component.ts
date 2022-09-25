@@ -9,6 +9,8 @@ import {FeatureService} from "../services/feature.service";
 export class FeatureListComponent implements OnInit {
   features: Feature[] = [];
 
+  initialLoading = true;
+
   constructor(
     private featureService: FeatureService,
   ) {
@@ -20,6 +22,9 @@ export class FeatureListComponent implements OnInit {
 
   getFeatures(): void {
     this.featureService.getFeatures()
-      .subscribe(features => this.features = features);
+      .subscribe(features => {
+        this.initialLoading = false;
+        this.features = features;
+      });
   }
 }

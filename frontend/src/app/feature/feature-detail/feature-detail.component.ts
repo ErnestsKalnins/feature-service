@@ -22,6 +22,7 @@ export class FeatureDetailComponent implements OnInit {
     updatedAt: 0,
   };
 
+  initialLoading = true;
   loading = false;
 
   showModal = false;
@@ -41,6 +42,7 @@ export class FeatureDetailComponent implements OnInit {
       })
     ).subscribe(feature => {
       this.feature = feature;
+      this.initialLoading = false;
     })
   }
 

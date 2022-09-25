@@ -1,4 +1,4 @@
-<div class="max-w-screen min-h-screen h-max bg-gray-100 p-4 sm:p-12 md:p-16 lg:p-32">
+<div class="max-w-screen min-h-screen h-max bg-gray-100 p-4 sm:p-12 md:p-16 lg:p-32 flex flex-col">
   <div class="flex justify-between mb-2 md:mb-8 items-center">
     <div>
       <h1 class="text-sm md:text-2xl">
@@ -10,13 +10,30 @@
       </span>
     </div>
 
-    <button class="text-sm md:text-base px-2 md:px-4 py-1 md:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg tracking-wide h-10"
-            routerLink="new">
+    <button
+      class="text-sm md:text-base px-2 md:px-4 py-1 md:py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg tracking-wide h-10"
+      routerLink="new">
       Add feature
     </button>
   </div>
 
-  <div class="bg-gray-50 rounded-lg shadow flex flex-col">
+
+  <div class="bg-gray-50 rounded-lg shadow flex flex-col"
+       [class.grow]="initialLoading"
+       [class.items-center]="initialLoading"
+       [class.justify-center]="initialLoading"
+  >
+    <svg class="animate-spin -ml-1 mr-3 h-16 w-16 text-indigo-500"
+         xmlns="http://www.w3.org/2000/svg"
+         fill="none"
+         viewBox="0 0 24 24"
+         *ngIf="initialLoading"
+    >
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+
     <div *ngFor="let feature of features"
          class="w-full p-4 border-b last:border-none border-gray-300 hover:shadow cursor-pointer flex flex-col sm:flex-row justify-between h-40 sm:h-20"
          [routerLink]="[feature.id]"
@@ -74,47 +91,47 @@
         >
       </div>
     </div>
-<!--    <table class="table-auto w-full">-->
-<!--      <thead>-->
-<!--      <tr class="border-b border-gray-200">-->
-<!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Name</th>-->
-<!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Description</th>-->
-<!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Expires On</th>-->
-<!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Status</th>-->
-<!--        <th></th>-->
-<!--      </tr>-->
-<!--      </thead>-->
-<!--      <tbody class="bg-white">-->
-<!--      <tr *ngFor="let feature of features"-->
-<!--          class="border-b last:border-b-0 border-gray-200 hover:shadow-md cursor-pointer"-->
-<!--          [routerLink]="[feature.id]"-->
-<!--      >-->
-<!--        <td class="text-sm py-3 px-4 tracking-wide">-->
-<!--          {{ feature.displayName || feature.technicalName }}-->
-<!--        </td>-->
-<!--        <td class="text-sm py-3 px-4 tracking-wide">-->
-<!--          {{ feature.description }}-->
-<!--        </td>-->
-<!--        <td class="text-sm py-3 px-4 tracking-wide">-->
-<!--          {{ feature.expiresOn | date: 'medium' }}-->
-<!--        </td>-->
-<!--        <td class="text-sm py-3 px-4 tracking-wide">-->
-<!--          <span class="bg-green-200 px-1.5 py-1 rounded-xl text-green-700 font-bold"-->
-<!--                [class.bg-red-200]="feature.inverted"-->
-<!--                [class.text-red-700]="feature.inverted"-->
-<!--          >-->
-<!--          {{ feature.inverted ? "Off" : "On" }}-->
-<!--          </span>-->
-<!--        </td>-->
-<!--        <td class="text-sm py-3 px-4 tracking-wide">-->
-<!--          <a class="text-indigo-600"-->
-<!--             [routerLink]="[feature.id, 'edit']"-->
-<!--          >-->
-<!--            Edit-->
-<!--          </a>-->
-<!--        </td>-->
-<!--      </tr>-->
-<!--      </tbody>-->
-<!--    </table>-->
+    <!--    <table class="table-auto w-full">-->
+    <!--      <thead>-->
+    <!--      <tr class="border-b border-gray-200">-->
+    <!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Name</th>-->
+    <!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Description</th>-->
+    <!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Expires On</th>-->
+    <!--        <th class="text-start text-sm font-medium py-3 px-4 tracking-wide">Status</th>-->
+    <!--        <th></th>-->
+    <!--      </tr>-->
+    <!--      </thead>-->
+    <!--      <tbody class="bg-white">-->
+    <!--      <tr *ngFor="let feature of features"-->
+    <!--          class="border-b last:border-b-0 border-gray-200 hover:shadow-md cursor-pointer"-->
+    <!--          [routerLink]="[feature.id]"-->
+    <!--      >-->
+    <!--        <td class="text-sm py-3 px-4 tracking-wide">-->
+    <!--          {{ feature.displayName || feature.technicalName }}-->
+    <!--        </td>-->
+    <!--        <td class="text-sm py-3 px-4 tracking-wide">-->
+    <!--          {{ feature.description }}-->
+    <!--        </td>-->
+    <!--        <td class="text-sm py-3 px-4 tracking-wide">-->
+    <!--          {{ feature.expiresOn | date: 'medium' }}-->
+    <!--        </td>-->
+    <!--        <td class="text-sm py-3 px-4 tracking-wide">-->
+    <!--          <span class="bg-green-200 px-1.5 py-1 rounded-xl text-green-700 font-bold"-->
+    <!--                [class.bg-red-200]="feature.inverted"-->
+    <!--                [class.text-red-700]="feature.inverted"-->
+    <!--          >-->
+    <!--          {{ feature.inverted ? "Off" : "On" }}-->
+    <!--          </span>-->
+    <!--        </td>-->
+    <!--        <td class="text-sm py-3 px-4 tracking-wide">-->
+    <!--          <a class="text-indigo-600"-->
+    <!--             [routerLink]="[feature.id, 'edit']"-->
+    <!--          >-->
+    <!--            Edit-->
+    <!--          </a>-->
+    <!--        </td>-->
+    <!--      </tr>-->
+    <!--      </tbody>-->
+    <!--    </table>-->
   </div>
 </div>
