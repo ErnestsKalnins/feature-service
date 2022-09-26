@@ -41,8 +41,37 @@ func (svc Service) saveFeature(ctx context.Context, f feature) error {
 	now := svc.timeFunc()
 	f.CreatedAt, f.UpdatedAt = now, now
 
-	if err := svc.store.saveFeature(ctx, f); err != nil {
+	tx, commit, rollback, err := svc.store.beginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelDefault,
+	})
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer rollback()
+
+	if err := tx.saveFeature(ctx, f); err != nil {
 		return fmt.Errorf("save feature: %w", err)
+	}
+
+	var cs []customer
+	for _, cid := range f.CustomerIDs {
+		id, err := svc.uuidFunc()
+		if err != nil {
+			return fmt.Errorf("generate customer feature join table id: %w", err)
+		}
+		cs = append(cs, customer{
+			ID:         id,
+			FeatureID:  f.ID,
+			CustomerID: cid,
+		})
+	}
+
+	if err := tx.saveCustomers(ctx, cs...); err != nil {
+		return fmt.Errorf("save customers: %w", err)
+	}
+
+	if err := commit(); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
 	}
 
 	return nil

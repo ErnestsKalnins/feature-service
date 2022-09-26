@@ -18,7 +18,7 @@ export class NewFeatureComponent implements OnInit {
     inverted: false,
     createdAt: 0,
     updatedAt: 0,
-    customerIds: null,
+    customerIds: [],
   };
 
   loading = false;
@@ -69,5 +69,17 @@ export class NewFeatureComponent implements OnInit {
           that.loading = false;
         }
       });
+  }
+
+  addCustomer(): void {
+    this.feature.customerIds = this.feature.customerIds!.concat("");
+  }
+
+  changeCustomer(e: any, i: number): void {
+    this.feature.customerIds![i] = e.target.value;
+  }
+
+  removeCustomer(i: number): void {
+    this.feature.customerIds!.splice(i, 1);
   }
 }

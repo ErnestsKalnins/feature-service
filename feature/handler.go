@@ -91,11 +91,12 @@ type featureResponse struct {
 }
 
 type saveFeatureRequest struct {
-	DisplayName   *string `json:"displayName"`
-	TechnicalName string  `json:"technicalName"`
-	ExpiresOn     *int64  `json:"expiresOn"`
-	Description   *string `json:"description"`
-	Inverted      bool    `json:"inverted"`
+	DisplayName   *string  `json:"displayName"`
+	TechnicalName string   `json:"technicalName"`
+	ExpiresOn     *int64   `json:"expiresOn"`
+	Description   *string  `json:"description"`
+	Inverted      bool     `json:"inverted"`
+	CustomerIDs   []string `json:"customerIds"`
 }
 
 func (r saveFeatureRequest) toFeature() feature {
@@ -104,6 +105,7 @@ func (r saveFeatureRequest) toFeature() feature {
 		TechnicalName: r.TechnicalName,
 		Description:   r.Description,
 		Inverted:      r.Inverted,
+		CustomerIDs:   r.CustomerIDs,
 	}
 	if r.ExpiresOn != nil {
 		res.ExpiresOn = new(time.Time)

@@ -23,7 +23,7 @@ export class FeatureService {
     return this.http.get<Feature>(this.featuresUrl + `/${id}`);
   }
 
-  saveFeature({technicalName, displayName, description, inverted, expiresOn}: Feature): Observable<HttpResponse<void>> {
+  saveFeature({technicalName, displayName, description, inverted, expiresOn, customerIds}: Feature): Observable<HttpResponse<void>> {
     const expiresOnRFC3339 = expiresOn === null
       ? null
       : new Date(expiresOn);
@@ -33,6 +33,7 @@ export class FeatureService {
       displayName,
       description,
       inverted,
+      customerIds,
       expiresOn: expiresOnRFC3339
     });
   }
