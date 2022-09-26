@@ -7,4 +7,5 @@ export interface Feature {
   inverted: boolean,
   createdAt: number,
   updatedAt: number,
+  customerIds: string[] | null,
 }

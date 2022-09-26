@@ -45,7 +45,7 @@ func (h Handler) GetFeature(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, err := h.service.store.findFeature(r.Context(), id)
+	f, err := h.service.store.findFeatureWithClients(r.Context(), id)
 	if err != nil {
 		hlog.FromRequest(r).
 			Error().
@@ -72,6 +72,9 @@ func responseFromFeature(f feature) featureResponse {
 		res.ExpiresOn = new(int64)
 		*res.ExpiresOn = f.ExpiresOn.UnixMilli()
 	}
+	if 0 < len(f.CustomerIDs) {
+		res.CustomerIDs = f.CustomerIDs
+	}
 	return res
 }
 
@@ -84,6 +87,7 @@ type featureResponse struct {
 	Inverted      bool      `json:"inverted"`
 	CreatedAt     int64     `json:"createdAt"`
 	UpdatedAt     int64     `json:"updatedAt"`
+	CustomerIDs   []string  `json:"customerIds,omitempty"`
 }
 
 type saveFeatureRequest struct {

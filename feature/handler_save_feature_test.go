@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -54,7 +55,7 @@ func TestSaveFeature(t *testing.T) {
 			timeFunc: func() time.Time { return refTime },
 			uuidFunc: func() (uuid.UUID, error) { return generatedUUID, nil },
 
-			body: `{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}`,
+			body: `{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":` + strconv.FormatInt(expiryDate.UnixMilli(), 10) + `,"description":"Placeholder text for feature description."}`,
 
 			wantStatus: http.StatusCreated,
 			wantFeatures: []feature{{
@@ -76,7 +77,7 @@ func TestSaveFeature(t *testing.T) {
 			}},
 			uuidFunc: func() (uuid.UUID, error) { return generatedUUID, nil },
 
-			body: `{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}`,
+			body: `{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":` + strconv.FormatInt(expiryDate.UnixMilli(), 10) + `,"description":"Placeholder text for feature description."}`,
 
 			wantStatus: http.StatusInternalServerError,
 			wantBody:   `{"error":"save feature: UNIQUE constraint failed: features.technical_name"}`,

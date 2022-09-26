@@ -18,6 +18,7 @@ export class NewFeatureComponent implements OnInit {
     inverted: false,
     createdAt: 0,
     updatedAt: 0,
+    customerIds: null,
   };
 
   loading = false;

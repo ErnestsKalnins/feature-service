@@ -18,6 +18,7 @@ type feature struct {
 	Inverted      bool       `json:"inverted"`
 	CreatedAt     time.Time  `json:"createdAt"`
 	UpdatedAt     time.Time  `json:"updatedAt"`
+	CustomerIDs   []string   `json:"customerIds,omitempty"`
 }
 
 func (f feature) validate() error {

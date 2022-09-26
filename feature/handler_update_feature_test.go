@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -58,7 +59,7 @@ func TestUpdateFeature(t *testing.T) {
 			timeFunc: func() time.Time { return refTime },
 
 			featureId: existingUUID.String(),
-			body:      `{"lastUpdatedAt":"` + lastUpdatedAt.Format(time.RFC3339) + `","feature":{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}}`,
+			body:      `{"lastUpdatedAt":` + strconv.FormatInt(lastUpdatedAt.UnixMilli(), 10) + `,"feature":{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":` + strconv.FormatInt(expiryDate.UnixMilli(), 10) + `,"description":"Placeholder text for feature description."}}`,
 
 			wantStatus: http.StatusNoContent,
 			wantFeatures: []feature{{
@@ -84,7 +85,7 @@ func TestUpdateFeature(t *testing.T) {
 			timeFunc: func() time.Time { return refTime },
 
 			featureId: existingUUID.String(),
-			body:      `{"lastUpdatedAt":"` + lastUpdatedAt.Format(time.RFC3339) + `","feature":{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}}`,
+			body:      `{"lastUpdatedAt":` + strconv.FormatInt(lastUpdatedAt.UnixMilli(), 10) + `,"feature":{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":` + strconv.FormatInt(expiryDate.UnixMilli(), 10) + `,"description":"Placeholder text for feature description."}}`,
 
 			wantStatus: http.StatusNotFound,
 			wantBody:   `{"error":"update feature: feature bb7fe5b6-24a5-4218-bc61-b487bbad9580 does not exist"}`,
@@ -102,7 +103,7 @@ func TestUpdateFeature(t *testing.T) {
 			timeFunc: func() time.Time { return refTime },
 
 			featureId: existingUUID.String(),
-			body:      `{"lastUpdatedAt":"` + lastUpdatedAt.Format(time.RFC3339) + `","feature":{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":"` + expiryDate.Format(time.RFC3339) + `","description":"Placeholder text for feature description."}}`,
+			body:      `{"lastUpdatedAt":` + strconv.FormatInt(lastUpdatedAt.UnixMilli(), 10) + `,"feature":{"displayName":"My Feature 1","technicalName":"my-feature-1","expiresOn":` + strconv.FormatInt(expiryDate.UnixMilli(), 10) + `,"description":"Placeholder text for feature description."}}`,
 
 			wantStatus: http.StatusNotFound,
 			wantBody:   `{"error":"update feature: feature bb7fe5b6-24a5-4218-bc61-b487bbad9580 does not exist"}`,

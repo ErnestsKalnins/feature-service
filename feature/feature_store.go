@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"feature/pkg/sqlx"
 	"fmt"
 	"net/http"
 	"time"
@@ -119,6 +120,49 @@ func (s Store) findFeature(ctx context.Context, id uuid.UUID) (*feature, error) 
 	return &f, nil
 }
 
+func (s Store) findFeatureWithClients(ctx context.Context, id uuid.UUID) (*feature, error) {
+	r := s.db.QueryRowContext(
+		ctx,
+		//language=sqlite
+		`
+		SELECT
+			f.display_name,
+			f.technical_name,
+			f.expires_on,
+			f.description,
+			f.inverted,
+			f.created_at,
+			f.updated_at,
+			CASE WHEN cf.customer_id IS NOT NULL THEN json_group_array(cf.customer_id)
+		END AS 'customer_ids'
+		FROM features f
+		LEFT JOIN customer_features cf ON f.id = cf.feature_id
+		WHERE f.id=?`,
+		id,
+	)
+
+	var fr featureRow
+	if err := r.Scan(
+		&fr.DisplayName,
+		&fr.TechnicalName,
+		&fr.ExpiresOn,
+		&fr.Description,
+		&fr.Inverted,
+		&fr.CreatedAt,
+		&fr.UpdatedAt,
+		&fr.CustomerIDs,
+	); err != nil {
+		return nil, err
+	}
+
+	if err := r.Err(); err != nil {
+		return nil, err
+	}
+
+	f := fr.toFeature()
+	return &f, nil
+}
+
 func (s Store) saveFeature(ctx context.Context, f feature) error {
 	r := featureToRow(f)
 	_, err := s.db.ExecContext(
@@ -206,6 +250,7 @@ type featureRow struct {
 	Inverted      bool
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
+	CustomerIDs   sqlx.JSONArray[string]
 }
 
 func (r featureRow) toFeature() feature {
@@ -224,6 +269,9 @@ func (r featureRow) toFeature() feature {
 	}
 	if r.Description.Valid {
 		f.Description = &r.Description.String
+	}
+	if 0 < len(r.CustomerIDs) {
+		f.CustomerIDs = r.CustomerIDs
 	}
 	return f
 }
