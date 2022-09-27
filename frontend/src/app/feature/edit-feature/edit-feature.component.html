@@ -93,6 +93,40 @@
                [disabled]="loading"
         >
       </div>
+
+      <div class="mt-4 sm:mt-8">
+        <label class="block text-gray-700 text-sm font-medium"
+               for="customers"
+        >
+          Customers
+        </label>
+
+        <div *ngFor="let customerId of feature.customerIds; index as i"
+             class="mt-1 flex rounded-md shadow-sm"
+        >
+          <input type="text"
+                 name="company-website"
+                 id="customers"
+                 class="block px-3 py-1.5 flex-1 rounded-none rounded-l-md border border-gray-300 focus:outline-indigo-500 text-sm sm:text-base"
+                 value="{{ customerId }}"
+                 (change)="changeCustomer($event, i)"
+          >
+          <button
+            class="inline-flex items-center rounded-r-md border border-l-0 border-red-300 bg-red-100 hover:bg-red-200 px-3 font-bold text-red-600"
+            (click)="removeCustomer(i)"
+          >
+            X
+          </button>
+        </div>
+
+        <button
+          class="w-32 sm:w-64 mt-2 px-2 sm:px-4 py-1 sm:py-2 text-sm sm:text-base bg-indigo-600 hover:bg-indigo-700 focus:bg-indigo-700 rounded-lg text-white tracking-wide focus:outline-none disabled:bg-indigo-700"
+          (click)="addCustomer()"
+          [disabled]="loading"
+        >
+          Add customer
+        </button>
+      </div>
     </div>
 
     <div class="p-6 bg-gray-50 flex items-center justify-end rounded-xl">

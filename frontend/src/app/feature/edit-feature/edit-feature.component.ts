@@ -19,7 +19,7 @@ export class EditFeatureComponent implements OnInit {
     inverted: false,
     createdAt: 0,
     updatedAt: 0,
-    customerIds: null,
+    customerIds: [],
   };
 
   loading = false;
@@ -51,7 +51,7 @@ export class EditFeatureComponent implements OnInit {
   }
 
   getExpiredOnDatetime(): string | null {
-    if (this.feature.expiresOn === null) {
+    if (this.feature.expiresOn === null || this.feature.expiresOn === undefined) {
       return null
     }
     const utc = new Date(this.feature.expiresOn);
@@ -77,5 +77,21 @@ export class EditFeatureComponent implements OnInit {
           that.loading = false;
         },
       });
+  }
+
+  addCustomer(): void {
+    if (this.feature.customerIds === undefined) {
+      this.feature.customerIds = [];
+    } else {
+      this.feature.customerIds = this.feature.customerIds!.concat("");
+    }
+  }
+
+  changeCustomer(e: any, i: number): void {
+    this.feature.customerIds![i] = e.target.value;
+  }
+
+  removeCustomer(i: number): void {
+    this.feature.customerIds!.splice(i, 1);
   }
 }

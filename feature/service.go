@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"feature/pkg/render"
+	"feature/pkg/set"
 	"fmt"
 	"github.com/google/uuid"
 	"time"
@@ -82,9 +83,56 @@ func (svc Service) updateFeature(ctx context.Context, lastUpdatedAt time.Time, f
 		return fmt.Errorf("validate feature: %w", err)
 	}
 
+	tx, commit, rollback, err := svc.store.beginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelReadCommitted,
+		ReadOnly:  false,
+	})
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer rollback()
+
 	f.UpdatedAt = svc.timeFunc()
-	if err := svc.store.updateFeature(ctx, lastUpdatedAt, f); err != nil {
+	if err := tx.updateFeature(ctx, lastUpdatedAt, f); err != nil {
 		return fmt.Errorf("update feature: %w", err)
+	}
+
+	ids, err := tx.findCustomerIDsByFeatureID(ctx, f.ID)
+	if err != nil {
+		return fmt.Errorf("find customer ids by feature id: %w", err)
+	}
+
+	var (
+		newIDs     = set.Of(f.CustomerIDs...)
+		currentIDs = set.Of(ids...)
+		common     = set.Intersection(newIDs, currentIDs)
+		toSave     = set.Sub(newIDs, common)
+		toDelete   = set.Sub(currentIDs, common)
+	)
+
+	var newCustomers []customer
+	for _, s := range toSave.ToSlice() {
+		id, err := svc.uuidFunc()
+		if err != nil {
+			return fmt.Errorf("generate customer feature join table id: %w", err)
+		}
+		newCustomers = append(newCustomers, customer{
+			ID:         id,
+			FeatureID:  f.ID,
+			CustomerID: s,
+		})
+	}
+
+	if err := tx.saveCustomers(ctx, newCustomers...); err != nil {
+		return fmt.Errorf("save new customers: %w", err)
+	}
+
+	if err := tx.deleteCustomersByCustomerIDs(ctx, toDelete.ToSlice()...); err != nil {
+		return fmt.Errorf("delete removed customers: %w", err)
+	}
+
+	if err := commit(); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
 	}
 
 	return nil

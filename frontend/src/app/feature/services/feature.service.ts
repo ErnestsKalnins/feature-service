@@ -2,13 +2,14 @@ import {Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {Feature} from "./feature";
+import {environment} from "../../../environments/environment.prod";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FeatureService {
-  private featuresUrl = 'http://localhost:8080/api/v1/features';
-  private archivedFeaturesUrl = 'http://localhost:8080/api/v1/archived_features';
+  private featuresUrl = `${environment.apiHost}/api/v1/features`;
+  private archivedFeaturesUrl = `${environment.apiHost}/api/v1/archived_features`;
 
   constructor(
     private http: HttpClient,
@@ -23,7 +24,14 @@ export class FeatureService {
     return this.http.get<Feature>(this.featuresUrl + `/${id}`);
   }
 
-  saveFeature({technicalName, displayName, description, inverted, expiresOn, customerIds}: Feature): Observable<HttpResponse<void>> {
+  saveFeature({
+                technicalName,
+                displayName,
+                description,
+                inverted,
+                expiresOn,
+                customerIds
+              }: Feature): Observable<HttpResponse<void>> {
     const expiresOnRFC3339 = expiresOn === null
       ? null
       : new Date(expiresOn);
@@ -34,7 +42,7 @@ export class FeatureService {
       description,
       inverted,
       customerIds,
-      expiresOn: expiresOnRFC3339
+      expiresOn: expiresOn === null ? undefined : new Date(expiresOn).valueOf()
     });
   }
 
@@ -45,7 +53,8 @@ export class FeatureService {
                   technicalName,
                   expiresOn,
                   description,
-                  inverted
+                  inverted,
+                  customerIds,
                 }: Feature): Observable<HttpResponse<void>> {
     return this.http.put<HttpResponse<void>>(this.featuresUrl + `/${id}`, {
       lastUpdatedAt: updatedAt,
@@ -55,6 +64,7 @@ export class FeatureService {
         expiresOn,
         description,
         inverted,
+        customerIds,
       }
     })
   }

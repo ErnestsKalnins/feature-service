@@ -141,7 +141,7 @@ func (s Store) findFeatureWithClients(ctx context.Context, id uuid.UUID) (*featu
 		id,
 	)
 
-	var fr featureRow
+	fr := featureRow{ID: id}
 	if err := r.Scan(
 		&fr.DisplayName,
 		&fr.TechnicalName,

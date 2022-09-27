@@ -4,6 +4,7 @@ import (
 	"context"
 	"feature/pkg/slices"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/doug-martin/goqu/v9"
@@ -37,6 +38,51 @@ func (s Store) saveCustomers(ctx context.Context, cs ...customer) error {
 		args...,
 	)
 	return err
+}
+
+func (s Store) deleteCustomersByCustomerIDs(ctx context.Context, customerIDs ...string) error {
+	if len(customerIDs) == 0 {
+		return nil
+	}
+
+	query, args, err := goqu.Dialect("sqlite3").
+		Delete(goqu.T("customer_features")).
+		Where(goqu.C("customer_id").In(customerIDs)).
+		Prepared(true).
+		ToSQL()
+	if err != nil {
+		return fmt.Errorf("bad query: %w", err)
+	}
+
+	_, err = s.db.ExecContext(ctx, query, args...)
+	return err
+}
+
+func (s Store) findCustomerIDsByFeatureID(ctx context.Context, featureID uuid.UUID) ([]string, error) {
+	//language=sqlite
+	rs, err := s.db.QueryContext(ctx, `SELECT customer_id FROM customer_features WHERE feature_id = ?`, featureID)
+	if err != nil {
+		return nil, err
+	}
+
+	var ids []string
+	for rs.Next() {
+		var id string
+		if err := rs.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+
+	if err := rs.Err(); err != nil {
+		return nil, err
+	}
+
+	if err := rs.Close(); err != nil {
+		return nil, err
+	}
+
+	return ids, nil
 }
 
 func (s Store) findCustomerFeaturesByTechnicalNames(ctx context.Context, customerID string, t time.Time, technicalNames ...string) ([]customerFeature, error) {
