@@ -14,3 +14,5 @@ CREATE TABLE customer_features
     FOREIGN KEY (feature_id) REFERENCES features (id) ON DELETE CASCADE,
     UNIQUE (customer_id, feature_id)
 );
+
+CREATE INDEX customer_id_idx ON customer_features(customer_id);
